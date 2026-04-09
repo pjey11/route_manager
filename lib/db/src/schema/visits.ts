@@ -7,6 +7,7 @@ export const uploadBatchesTable = pgTable("upload_batches", {
   date: text("date").notNull(),
   totalVisits: integer("total_visits").notNull(),
   isDayComplete: boolean("is_day_complete").notNull().default(false),
+  adminReminderSent: boolean("admin_reminder_sent").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
