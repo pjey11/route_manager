@@ -18,6 +18,8 @@ tags:
     description: Notification templates
   - name: notifications
     description: WhatsApp notifications
+  - name: profile
+    description: Operator profile
 
 paths:
   /healthz:
@@ -318,6 +320,42 @@ paths:
               schema:
                 $ref: "#/components/schemas/Template"
 
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get operator profile
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    put:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update operator profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileBody"
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /notifications/bulk:
     post:
       operationId: sendBulkNotification
@@ -562,6 +600,34 @@ components:
           description: Date in YYYY-MM-DD format
       required:
         - date
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - name
+        - phone
+        - updatedAt
+
+    UpdateProfileBody:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+      required:
+        - name
+        - phone
 
     BulkNotificationResponse:
       type: object

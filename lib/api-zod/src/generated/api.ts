@@ -300,6 +300,31 @@ export const UpdateTemplateResponse = zod.object({
 });
 
 /**
+ * @summary Get operator profile
+ */
+export const GetProfileResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  phone: zod.string(),
+  updatedAt: zod.string(),
+});
+
+/**
+ * @summary Update operator profile
+ */
+export const UpdateProfileBody = zod.object({
+  name: zod.string(),
+  phone: zod.string(),
+});
+
+export const UpdateProfileResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  phone: zod.string(),
+  updatedAt: zod.string(),
+});
+
+/**
  * @summary Send template 4 bulk notification to all contacts for a date
  */
 export const SendBulkNotificationBody = zod.object({

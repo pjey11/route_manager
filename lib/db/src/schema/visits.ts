@@ -34,6 +34,15 @@ export const notificationTemplatesTable = pgTable("notification_templates", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const profileTable = pgTable("profile", {
+  id: integer("id").primaryKey().default(1),
+  name: text("name").notNull().default(""),
+  phone: text("phone").notNull().default(""),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type Profile = typeof profileTable.$inferSelect;
+
 export const insertVisitSchema = createInsertSchema(visitsTable).omit({ id: true, createdAt: true });
 export const insertBatchSchema = createInsertSchema(uploadBatchesTable).omit({ id: true, createdAt: true });
 export const insertTemplateSchema = createInsertSchema(notificationTemplatesTable).omit({ updatedAt: true });

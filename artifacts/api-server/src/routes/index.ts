@@ -4,6 +4,7 @@ import authRouter from "./auth";
 import visitsRouter from "./visits";
 import templatesRouter from "./templates";
 import notificationsRouter from "./notifications";
+import profileRouter from "./profile";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(authRouter);
 router.use(visitsRouter);
 router.use(templatesRouter);
 router.use(notificationsRouter);
+router.use(profileRouter);
 
 export default router;

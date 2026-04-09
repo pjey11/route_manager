@@ -109,6 +109,18 @@ export interface BulkNotificationBody {
   date: string;
 }
 
+export interface Profile {
+  id: number;
+  name: string;
+  phone: string;
+  updatedAt: string;
+}
+
+export interface UpdateProfileBody {
+  name: string;
+  phone: string;
+}
+
 export interface BulkNotificationResponse {
   success: boolean;
   sent: number;
