@@ -3,20 +3,28 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Sai Trips API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: visits
+    description: Visit management
+  - name: templates
+    description: Notification templates
+  - name: notifications
+    description: WhatsApp notifications
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +32,317 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /visits:
+    get:
+      operationId: listVisits
+      tags: [visits]
+      summary: List visits for a date
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            description: Date in YYYY-MM-DD format, defaults to today
+      responses:
+        "200":
+          description: List of visits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisitsResponse"
+
+  /visits/upload:
+    post:
+      operationId: uploadVisits
+      tags: [visits]
+      summary: Upload Excel file with visits
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        "200":
+          description: Visits uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /visits/dates:
+    get:
+      operationId: listVisitDates
+      tags: [visits]
+      summary: List all dates that have visits
+      responses:
+        "200":
+          description: List of dates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatesResponse"
+
+  /visits/{id}/start:
+    post:
+      operationId: startVisit
+      tags: [visits]
+      summary: Mark visit as started and send template 1 to contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Visit started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisitActionResponse"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /visits/{id}/complete:
+    post:
+      operationId: completeVisit
+      tags: [visits]
+      summary: Mark visit as complete, send template 3 to current and template 1 to next
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Visit completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisitActionResponse"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /visits/{id}/end:
+    post:
+      operationId: endVisit
+      tags: [visits]
+      summary: End last visit (Sai Palki ends), send template 3 to last person
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Last visit ended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisitActionResponse"
+
+  /visits/{id}/end-day:
+    post:
+      operationId: endDay
+      tags: [visits]
+      summary: Mark the day as complete (Ending Sai day)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Day ended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisitActionResponse"
+
+  /visits/{id}/geofence-alert:
+    post:
+      operationId: geofenceAlert
+      tags: [visits]
+      summary: Log that user is within 500m - returns template 2 message for manual send
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Geofence alert logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeofenceResponse"
+
+  /visits/{id}/send-geofence:
+    post:
+      operationId: sendGeofenceMessage
+      tags: [visits]
+      summary: Send template 2 WhatsApp message (user is 2-3 mins away)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisitActionResponse"
+
+  /templates:
+    get:
+      operationId: listTemplates
+      tags: [templates]
+      summary: List all notification templates
+      responses:
+        "200":
+          description: Templates list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TemplatesResponse"
+
+  /templates/{id}:
+    put:
+      operationId: updateTemplate
+      tags: [templates]
+      summary: Update a notification template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTemplateBody"
+      responses:
+        "200":
+          description: Template updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Template"
+
+  /notifications/bulk:
+    post:
+      operationId: sendBulkNotification
+      tags: [notifications]
+      summary: Send template 4 bulk notification to all contacts for a date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkNotificationBody"
+      responses:
+        "200":
+          description: Bulk notification sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkNotificationResponse"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +353,231 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+      required:
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    AuthUser:
+      type: object
+      properties:
+        email:
+          type: string
+        isAuthenticated:
+          type: boolean
+      required:
+        - email
+        - isAuthenticated
+
+    Visit:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+        stopNumber:
+          type: integer
+        visitTime:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        status:
+          type: string
+          enum: [pending, started, completed, ended, day_ended]
+        isFirst:
+          type: boolean
+        isLast:
+          type: boolean
+        batchId:
+          type: integer
+      required:
+        - id
+        - date
+        - stopNumber
+        - visitTime
+        - name
+        - phone
+        - address
+        - status
+        - isFirst
+        - isLast
+        - batchId
+
+    VisitsResponse:
+      type: object
+      properties:
+        visits:
+          type: array
+          items:
+            $ref: "#/components/schemas/Visit"
+        date:
+          type: string
+        isDayComplete:
+          type: boolean
+        totalCount:
+          type: integer
+        activeIndex:
+          type: integer
+          description: Index of the currently active visit (last started or last completed + 1)
+      required:
+        - visits
+        - date
+        - isDayComplete
+        - totalCount
+
+    UploadResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        count:
+          type: integer
+        date:
+          type: string
+        batchId:
+          type: integer
+      required:
+        - success
+        - message
+        - count
+        - date
+        - batchId
+
+    DatesResponse:
+      type: object
+      properties:
+        dates:
+          type: array
+          items:
+            type: string
+      required:
+        - dates
+
+    VisitActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        visit:
+          $ref: "#/components/schemas/Visit"
+        whatsappSent:
+          type: boolean
+        whatsappError:
+          type: string
+      required:
+        - success
+        - visit
+        - whatsappSent
+
+    GeofenceResponse:
+      type: object
+      properties:
+        shouldSendMessage:
+          type: boolean
+        message:
+          type: string
+        visit:
+          $ref: "#/components/schemas/Visit"
+      required:
+        - shouldSendMessage
+        - visit
+
+    Template:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        content:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - name
+        - description
+        - content
+
+    TemplatesResponse:
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            $ref: "#/components/schemas/Template"
+      required:
+        - templates
+
+    UpdateTemplateBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+
+    BulkNotificationBody:
+      type: object
+      properties:
+        date:
+          type: string
+          description: Date in YYYY-MM-DD format
+      required:
+        - date
+
+    BulkNotificationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        sent:
+          type: integer
+        failed:
+          type: integer
+        total:
+          type: integer
+        message:
+          type: string
+      required:
+        - success
+        - sent
+        - failed
+        - total

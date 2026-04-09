@@ -1,0 +1,43 @@
+import { pgTable, serial, text, integer, real, boolean, timestamp, date } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+
+export const uploadBatchesTable = pgTable("upload_batches", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull(),
+  totalVisits: integer("total_visits").notNull(),
+  isDayComplete: boolean("is_day_complete").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const visitsTable = pgTable("visits", {
+  id: serial("id").primaryKey(),
+  batchId: integer("batch_id").notNull().references(() => uploadBatchesTable.id),
+  date: text("date").notNull(),
+  stopNumber: integer("stop_number").notNull(),
+  visitTime: text("visit_time").notNull(),
+  name: text("name").notNull(),
+  phone: text("phone").notNull(),
+  address: text("address").notNull(),
+  lat: real("lat"),
+  lng: real("lng"),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const notificationTemplatesTable = pgTable("notification_templates", {
+  id: integer("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  content: text("content").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertVisitSchema = createInsertSchema(visitsTable).omit({ id: true, createdAt: true });
+export const insertBatchSchema = createInsertSchema(uploadBatchesTable).omit({ id: true, createdAt: true });
+export const insertTemplateSchema = createInsertSchema(notificationTemplatesTable).omit({ updatedAt: true });
+
+export type Visit = typeof visitsTable.$inferSelect;
+export type InsertVisit = z.infer<typeof insertVisitSchema>;
+export type UploadBatch = typeof uploadBatchesTable.$inferSelect;
+export type NotificationTemplate = typeof notificationTemplatesTable.$inferSelect;
