@@ -1,0 +1,21 @@
+Create a web app that can take excel sheet as an input which will contains the date, stop number, anticipated visit time, name of the person, phone number and the address. Display each row as cards and in a list view. The first person will have 2 CTA buttons named as 'Sai Palki starts', and 'Bikhsa received. Palki continues'. The second until last but contact will have 2 buttons named as 'Bikhsa received. Palki continues'. The last person will have 2 buttons named as 'Sai Palki ends' and 'Ending Sai day'.
+
+The web app should needs authorization to login using only one username and password, which is saiadmin@twadmin.com and the password is 5A18A8A.
+
+When the excel sheet uploaded doesnot have the 6 columns mentioned then throw an error. If there are null value in any of the rows, throw an error and ask the user to upload the right sheet. If the number of visits per day is more than 20, then show an error and do not proceed. If the total number of rows is more than 300, then show an error and do not proceed. No other validations are required.
+
+Integrate with Whatsapp as the messaging application.
+
+All 4 notifications explained below should be templated, and it should be available in the admin section for customization. Customization should include the name of the person dynamically.
+
+Add an in-app reminder alert to the User of the app to send the 1st notification 30 mins before the start time. The in-app reminder text is 'OmSaiRam - Time to inform the first devotee of the day'. Tapping the notification opens the web app, and lands on the current day.
+
+The 'Sai Plaki starts' button will trigger the 1st notification template. It informs the person that we will arrive shortly.
+
+Enable Geofencting so that when the User of the app is 500 meters within the address, the contact should get a message that we are 2-3 mins away from your home. This is the 2nd notification.
+
+When the User press 'Visit complete' send 2 messages. One to the person of the current address of thank them, which will be the 3rd template. And another to the next person in the order, informing them that we are about to start from the current location, using the 1st template.
+
+The app will be used by on both Desktop and Mobile, so the page should be responsive on Mobile.
+
+Add a tab to allow the User of the app to send a standard bulk notification for all contacts by a day. This is the notification template 4.
