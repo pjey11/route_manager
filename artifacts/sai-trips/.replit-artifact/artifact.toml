@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Sai Trips"
+version = "1.0.0"
+id = "artifacts/sai-trips"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21273
+
+[services.development]
+run = "pnpm --filter @workspace/sai-trips run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/sai-trips", "run", "build" ]
+publicDir = "artifacts/sai-trips/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21273"
+BASE_PATH = "/"

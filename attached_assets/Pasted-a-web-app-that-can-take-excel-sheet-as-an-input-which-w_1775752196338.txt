@@ -1,0 +1,28 @@
+a web app that can take excel sheet as an input which will contains the date, stop number, anticipated visit time, name of the person, phone number and the address. Display each row as cards and in a list view.
+
+The first person will have 2 CTA buttons named as 'Sai Palki starts', and 'Bikhsa received. Palki continues'. The second until the last contact will have only one button named as 'Bikhsa received. Palki continues'. The last person will have 2 buttons named as 'Sai Palki ends' and 'Ending Sai day'.
+
+When the excel sheet uploaded doesnot have the 6 columns mentioned then throw an error and do not proceed. If there are null values in any of the rows, throw an error and do not proceed. If the number of visits per day is more than 20, then show an error and do not proceed. If the total number of rows is more than 300, then show an error and do not proceed. No other validations are required.
+
+Integrate with Whatsapp as the messaging application.
+
+All 4 notifications explained below should be templated, and it should be available in the 'Notifications' section for customization. Customization should include the name of the person dynamically, the rest will be static text.
+
+Add an in-app reminder alert to the User of the app to send the 1st notification 30 mins before the start time. The in-app reminder text is 'OmSaiRam - Time to inform the first devotee of the day'. Tapping the notification opens the web app, and lands on the current day.
+
+The 'Sai Plaki starts' button will trigger the 1st notification template. It is to inform the contact that we will arrive shortly. 1st notification template will be used accordingly.
+
+Enable Geofencting so that when the User of the app is 500 meters within the address, show another in-app message to the user of the app to send the 2nd notification template. The 2nd notification template is to inform the contact that we are 2-3 mins away from your home.
+
+User should press the button 'Bikhsa received. Palki continues' to complete the trip at that location. When the User press the button, the application should send 2 notifications. One to the person of the current address to thank them, which will be the 3rd notification template. And another one to the next person in the order, informing them that we are about to start from the current location, using the 1st template.
+
+Until the last location's visit is marked as complete, do not enable the notification buttons for the next person in the order, to avoid mistaken notificaitons.
+
+When the User press 'Sai Palki ends' for the last person, send the 3nd notification template thanking the last person.
+
+When the User press
+The app will be used by on both Desktop and Mobile, so the page should be responsive on Mobile.
+
+Add a tab to allow the User of the app to send a standard bulk notification for all contacts by a day. This is the notification template 4. This is to send standard instructions. No personalization is required for this template.
+
+The web app shoud need authorization to login using only one username and password, which is saiadmin@twadmin.com and the password is 5A18A8A.
