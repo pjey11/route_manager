@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useGetMe, useLogout } from "@workspace/api-client-react";
-import { LogOut, Map, Bell, Send } from "lucide-react";
+import { LogOut, Map, Bell, Send, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -24,6 +24,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { href: "/", label: "Sai Trips", icon: Map },
     { href: "/notifications", label: "Notifications", icon: Bell },
     { href: "/instructions", label: "Instructions", icon: Send },
+    { href: "/profile", label: "Profile", icon: UserCircle },
   ];
 
   return (

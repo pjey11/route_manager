@@ -1,13 +1,19 @@
 import { eq, and, asc } from "drizzle-orm";
-import { db, visitsTable, uploadBatchesTable } from "@workspace/db";
+import { db, visitsTable, uploadBatchesTable, profileTable } from "@workspace/db";
 import { sendWhatsApp } from "./whatsapp";
 import { logger } from "./logger";
 
-const ADMIN_WHATSAPP_PHONE = process.env.ADMIN_WHATSAPP_PHONE;
 const CHECK_INTERVAL_MS = 60 * 1000;
 
+async function getAdminPhone(): Promise<string | null> {
+  const rows = await db.select().from(profileTable).where(eq(profileTable.id, 1)).limit(1);
+  const phone = rows[0]?.phone?.trim();
+  return phone || null;
+}
+
 async function checkAndSendAdminReminder(): Promise<void> {
-  if (!ADMIN_WHATSAPP_PHONE) return;
+  const adminPhone = await getAdminPhone();
+  if (!adminPhone) return;
 
   const today = new Date().toISOString().split("T")[0];
   const now = new Date();
@@ -65,7 +71,7 @@ async function checkAndSendAdminReminder(): Promise<void> {
       `Address: ${visit.address}\n\n` +
       `Please prepare and notify the devotee. Jai Sairam!`;
 
-    const result = await sendWhatsApp(ADMIN_WHATSAPP_PHONE, message);
+    const result = await sendWhatsApp(adminPhone, message);
 
     await db
       .update(uploadBatchesTable)
