@@ -315,10 +315,20 @@ export default function Home() {
                           <Phone className="w-4 h-4 flex-shrink-0" />
                           <span>{visit.phone}</span>
                         </div>
-                        <div className="flex items-start gap-2">
-                          <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                          <span className="line-clamp-2">{visit.address}</span>
-                        </div>
+                        <a
+                          href={
+                            visit.lat && visit.lng
+                              ? `https://www.google.com/maps?q=${visit.lat},${visit.lng}`
+                              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(visit.address)}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-start gap-2 group hover:text-primary transition-colors"
+                          title="Open in Google Maps"
+                        >
+                          <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:text-primary" />
+                          <span className="line-clamp-2 group-hover:underline">{visit.address}</span>
+                        </a>
                       </div>
                     </div>
 
