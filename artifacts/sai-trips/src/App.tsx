@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import Notifications from "@/pages/notifications";
 import Instructions from "@/pages/instructions";
 import Profile from "@/pages/profile";
+import Reports from "@/pages/reports";
 import { Layout } from "@/components/layout";
 
 const queryClient = new QueryClient({
@@ -71,6 +72,9 @@ function Router() {
       </Route>
       <Route path="/profile">
         <ProtectedRoute component={Profile} />
+      </Route>
+      <Route path="/reports">
+        <ProtectedRoute component={Reports} />
       </Route>
       <Route component={NotFound} />
     </Switch>
