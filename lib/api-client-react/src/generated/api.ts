@@ -17,6 +17,9 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AddVisitPhotoBody,
+  AiSettings,
+  AnalyzePhotoResponse,
   AuthUser,
   BulkNotificationBody,
   BulkNotificationResponse,
@@ -27,14 +30,19 @@ import type {
   ListVisitsParams,
   LoginBody,
   Profile,
+  RequestUploadUrlBody,
+  RequestUploadUrlResponse,
   SuccessResponse,
   Template,
   TemplatesResponse,
+  UpdateAiSettingsBody,
   UpdateProfileBody,
   UpdateTemplateBody,
   UploadResponse,
   UploadVisitsBody,
   VisitActionResponse,
+  VisitPhoto,
+  VisitPhotosResponse,
   VisitsResponse,
 } from "./api.schemas";
 
@@ -1273,6 +1281,600 @@ export const useUpdateTemplate = <
   TContext
 > => {
   return useMutation(getUpdateTemplateMutationOptions(options));
+};
+
+/**
+ * @summary Request a presigned upload URL for object storage
+ */
+export const getRequestUploadUrlUrl = () => {
+  return `/api/storage/uploads/request-url`;
+};
+
+export const requestUploadUrl = async (
+  requestUploadUrlBody: RequestUploadUrlBody,
+  options?: RequestInit,
+): Promise<RequestUploadUrlResponse> => {
+  return customFetch<RequestUploadUrlResponse>(getRequestUploadUrlUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(requestUploadUrlBody),
+  });
+};
+
+export const getRequestUploadUrlMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requestUploadUrl>>,
+    TError,
+    { data: BodyType<RequestUploadUrlBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof requestUploadUrl>>,
+  TError,
+  { data: BodyType<RequestUploadUrlBody> },
+  TContext
+> => {
+  const mutationKey = ["requestUploadUrl"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof requestUploadUrl>>,
+    { data: BodyType<RequestUploadUrlBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return requestUploadUrl(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RequestUploadUrlMutationResult = NonNullable<
+  Awaited<ReturnType<typeof requestUploadUrl>>
+>;
+export type RequestUploadUrlMutationBody = BodyType<RequestUploadUrlBody>;
+export type RequestUploadUrlMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Request a presigned upload URL for object storage
+ */
+export const useRequestUploadUrl = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requestUploadUrl>>,
+    TError,
+    { data: BodyType<RequestUploadUrlBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof requestUploadUrl>>,
+  TError,
+  { data: BodyType<RequestUploadUrlBody> },
+  TContext
+> => {
+  return useMutation(getRequestUploadUrlMutationOptions(options));
+};
+
+/**
+ * @summary List photos for a visit
+ */
+export const getListVisitPhotosUrl = (id: number) => {
+  return `/api/visits/${id}/photos`;
+};
+
+export const listVisitPhotos = async (
+  id: number,
+  options?: RequestInit,
+): Promise<VisitPhotosResponse> => {
+  return customFetch<VisitPhotosResponse>(getListVisitPhotosUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListVisitPhotosQueryKey = (id: number) => {
+  return [`/api/visits/${id}/photos`] as const;
+};
+
+export const getListVisitPhotosQueryOptions = <
+  TData = Awaited<ReturnType<typeof listVisitPhotos>>,
+  TError = ErrorType<unknown>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listVisitPhotos>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListVisitPhotosQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listVisitPhotos>>> = ({
+    signal,
+  }) => listVisitPhotos(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof listVisitPhotos>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListVisitPhotosQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listVisitPhotos>>
+>;
+export type ListVisitPhotosQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List photos for a visit
+ */
+
+export function useListVisitPhotos<
+  TData = Awaited<ReturnType<typeof listVisitPhotos>>,
+  TError = ErrorType<unknown>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listVisitPhotos>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListVisitPhotosQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Save uploaded photo metadata for a visit (max 3 per visit)
+ */
+export const getAddVisitPhotoUrl = (id: number) => {
+  return `/api/visits/${id}/photos`;
+};
+
+export const addVisitPhoto = async (
+  id: number,
+  addVisitPhotoBody: AddVisitPhotoBody,
+  options?: RequestInit,
+): Promise<VisitPhoto> => {
+  return customFetch<VisitPhoto>(getAddVisitPhotoUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(addVisitPhotoBody),
+  });
+};
+
+export const getAddVisitPhotoMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof addVisitPhoto>>,
+    TError,
+    { id: number; data: BodyType<AddVisitPhotoBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof addVisitPhoto>>,
+  TError,
+  { id: number; data: BodyType<AddVisitPhotoBody> },
+  TContext
+> => {
+  const mutationKey = ["addVisitPhoto"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof addVisitPhoto>>,
+    { id: number; data: BodyType<AddVisitPhotoBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return addVisitPhoto(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AddVisitPhotoMutationResult = NonNullable<
+  Awaited<ReturnType<typeof addVisitPhoto>>
+>;
+export type AddVisitPhotoMutationBody = BodyType<AddVisitPhotoBody>;
+export type AddVisitPhotoMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Save uploaded photo metadata for a visit (max 3 per visit)
+ */
+export const useAddVisitPhoto = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof addVisitPhoto>>,
+    TError,
+    { id: number; data: BodyType<AddVisitPhotoBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof addVisitPhoto>>,
+  TError,
+  { id: number; data: BodyType<AddVisitPhotoBody> },
+  TContext
+> => {
+  return useMutation(getAddVisitPhotoMutationOptions(options));
+};
+
+/**
+ * @summary Delete a visit photo
+ */
+export const getDeleteVisitPhotoUrl = (id: number, photoId: number) => {
+  return `/api/visits/${id}/photos/${photoId}`;
+};
+
+export const deleteVisitPhoto = async (
+  id: number,
+  photoId: number,
+  options?: RequestInit,
+): Promise<SuccessResponse> => {
+  return customFetch<SuccessResponse>(getDeleteVisitPhotoUrl(id, photoId), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteVisitPhotoMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteVisitPhoto>>,
+    TError,
+    { id: number; photoId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteVisitPhoto>>,
+  TError,
+  { id: number; photoId: number },
+  TContext
+> => {
+  const mutationKey = ["deleteVisitPhoto"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteVisitPhoto>>,
+    { id: number; photoId: number }
+  > = (props) => {
+    const { id, photoId } = props ?? {};
+
+    return deleteVisitPhoto(id, photoId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteVisitPhotoMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteVisitPhoto>>
+>;
+
+export type DeleteVisitPhotoMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a visit photo
+ */
+export const useDeleteVisitPhoto = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteVisitPhoto>>,
+    TError,
+    { id: number; photoId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteVisitPhoto>>,
+  TError,
+  { id: number; photoId: number },
+  TContext
+> => {
+  return useMutation(getDeleteVisitPhotoMutationOptions(options));
+};
+
+/**
+ * @summary Run AI head count on a visit photo
+ */
+export const getAnalyzeVisitPhotoUrl = (id: number, photoId: number) => {
+  return `/api/visits/${id}/photos/${photoId}/analyze`;
+};
+
+export const analyzeVisitPhoto = async (
+  id: number,
+  photoId: number,
+  options?: RequestInit,
+): Promise<AnalyzePhotoResponse> => {
+  return customFetch<AnalyzePhotoResponse>(
+    getAnalyzeVisitPhotoUrl(id, photoId),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getAnalyzeVisitPhotoMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeVisitPhoto>>,
+    TError,
+    { id: number; photoId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof analyzeVisitPhoto>>,
+  TError,
+  { id: number; photoId: number },
+  TContext
+> => {
+  const mutationKey = ["analyzeVisitPhoto"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof analyzeVisitPhoto>>,
+    { id: number; photoId: number }
+  > = (props) => {
+    const { id, photoId } = props ?? {};
+
+    return analyzeVisitPhoto(id, photoId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AnalyzeVisitPhotoMutationResult = NonNullable<
+  Awaited<ReturnType<typeof analyzeVisitPhoto>>
+>;
+
+export type AnalyzeVisitPhotoMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Run AI head count on a visit photo
+ */
+export const useAnalyzeVisitPhoto = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeVisitPhoto>>,
+    TError,
+    { id: number; photoId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof analyzeVisitPhoto>>,
+  TError,
+  { id: number; photoId: number },
+  TContext
+> => {
+  return useMutation(getAnalyzeVisitPhotoMutationOptions(options));
+};
+
+/**
+ * @summary Get AI model settings
+ */
+export const getGetAiSettingsUrl = () => {
+  return `/api/ai-settings`;
+};
+
+export const getAiSettings = async (
+  options?: RequestInit,
+): Promise<AiSettings> => {
+  return customFetch<AiSettings>(getGetAiSettingsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAiSettingsQueryKey = () => {
+  return [`/api/ai-settings`] as const;
+};
+
+export const getGetAiSettingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAiSettings>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAiSettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAiSettingsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAiSettings>>> = ({
+    signal,
+  }) => getAiSettings({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAiSettings>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAiSettingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAiSettings>>
+>;
+export type GetAiSettingsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get AI model settings
+ */
+
+export function useGetAiSettings<
+  TData = Awaited<ReturnType<typeof getAiSettings>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAiSettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAiSettingsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update AI model settings
+ */
+export const getUpdateAiSettingsUrl = () => {
+  return `/api/ai-settings`;
+};
+
+export const updateAiSettings = async (
+  updateAiSettingsBody: UpdateAiSettingsBody,
+  options?: RequestInit,
+): Promise<AiSettings> => {
+  return customFetch<AiSettings>(getUpdateAiSettingsUrl(), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateAiSettingsBody),
+  });
+};
+
+export const getUpdateAiSettingsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateAiSettings>>,
+    TError,
+    { data: BodyType<UpdateAiSettingsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateAiSettings>>,
+  TError,
+  { data: BodyType<UpdateAiSettingsBody> },
+  TContext
+> => {
+  const mutationKey = ["updateAiSettings"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateAiSettings>>,
+    { data: BodyType<UpdateAiSettingsBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateAiSettings(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateAiSettingsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateAiSettings>>
+>;
+export type UpdateAiSettingsMutationBody = BodyType<UpdateAiSettingsBody>;
+export type UpdateAiSettingsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update AI model settings
+ */
+export const useUpdateAiSettings = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateAiSettings>>,
+    TError,
+    { data: BodyType<UpdateAiSettingsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateAiSettings>>,
+  TError,
+  { data: BodyType<UpdateAiSettingsBody> },
+  TContext
+> => {
+  return useMutation(getUpdateAiSettingsMutationOptions(options));
 };
 
 /**

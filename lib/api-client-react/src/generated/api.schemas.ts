@@ -121,6 +121,52 @@ export interface UpdateProfileBody {
   phone: string;
 }
 
+export interface RequestUploadUrlBody {
+  name: string;
+  size: number;
+  contentType: string;
+}
+
+export interface RequestUploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+}
+
+export interface VisitPhoto {
+  id: number;
+  visitId: number;
+  objectPath: string;
+  headCount?: number | null;
+  aiModel?: string | null;
+  createdAt: string;
+}
+
+export interface VisitPhotosResponse {
+  photos: VisitPhoto[];
+}
+
+export interface AddVisitPhotoBody {
+  objectPath: string;
+}
+
+export interface AnalyzePhotoResponse {
+  headCount: number;
+  aiModel: string;
+  photo: VisitPhoto;
+}
+
+export interface AiSettings {
+  id: number;
+  provider: string;
+  modelId: string;
+  updatedAt: string;
+}
+
+export interface UpdateAiSettingsBody {
+  provider: string;
+  modelId: string;
+}
+
 export interface BulkNotificationResponse {
   success: boolean;
   sent: number;

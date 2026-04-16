@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./addVisitPhotoBody";
+export * from "./aiSettings";
+export * from "./analyzePhotoResponse";
 export * from "./authUser";
 export * from "./bulkNotificationBody";
 export * from "./bulkNotificationResponse";
@@ -16,14 +19,19 @@ export * from "./healthStatus";
 export * from "./listVisitsParams";
 export * from "./loginBody";
 export * from "./profile";
+export * from "./requestUploadUrlBody";
+export * from "./requestUploadUrlResponse";
 export * from "./successResponse";
 export * from "./template";
 export * from "./templatesResponse";
+export * from "./updateAiSettingsBody";
 export * from "./updateProfileBody";
 export * from "./updateTemplateBody";
 export * from "./uploadResponse";
 export * from "./uploadVisitsBody";
 export * from "./visit";
 export * from "./visitActionResponse";
+export * from "./visitPhoto";
+export * from "./visitPhotosResponse";
 export * from "./visitsResponse";
 export * from "./visitStatus";
