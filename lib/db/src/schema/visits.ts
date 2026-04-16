@@ -41,6 +41,22 @@ export const profileTable = pgTable("profile", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const visitPhotosTable = pgTable("visit_photos", {
+  id: serial("id").primaryKey(),
+  visitId: integer("visit_id").notNull().references(() => visitsTable.id, { onDelete: "cascade" }),
+  objectPath: text("object_path").notNull(),
+  headCount: integer("head_count"),
+  aiModel: text("ai_model"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const aiSettingsTable = pgTable("ai_settings", {
+  id: integer("id").primaryKey().default(1),
+  provider: text("provider").notNull().default("huggingface"),
+  modelId: text("model_id").notNull().default("facebook/detr-resnet-50"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export type Profile = typeof profileTable.$inferSelect;
 
 export const insertVisitSchema = createInsertSchema(visitsTable).omit({ id: true, createdAt: true });

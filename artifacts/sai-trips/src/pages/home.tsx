@@ -18,6 +18,7 @@ import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { Lock, MapPin, Phone, Clock, Upload, CheckCircle2, Check } from "lucide-react";
 import { GeofenceWatcher } from "@/components/geofence-watcher";
+import { VisitPhotos } from "@/components/visit-photos";
 
 export default function Home() {
   const queryClient = useQueryClient();
@@ -415,6 +416,8 @@ export default function Home() {
                     </div>
 
                   </div>
+
+                  <VisitPhotos visitId={visit.id} />
                 </CardContent>
               </Card>
             );

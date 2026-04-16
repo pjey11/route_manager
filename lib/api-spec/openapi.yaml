@@ -20,6 +20,12 @@ tags:
     description: WhatsApp notifications
   - name: profile
     description: Operator profile
+  - name: storage
+    description: Object storage
+  - name: photos
+    description: Visit photo management
+  - name: ai-settings
+    description: AI model configuration
 
 paths:
   /healthz:
@@ -319,6 +325,157 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Template"
+
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a presigned upload URL for object storage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestUploadUrlBody"
+      responses:
+        "200":
+          description: Presigned URL generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestUploadUrlResponse"
+
+  /visits/{id}/photos:
+    get:
+      operationId: listVisitPhotos
+      tags: [photos]
+      summary: List photos for a visit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Photos list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisitPhotosResponse"
+    post:
+      operationId: addVisitPhoto
+      tags: [photos]
+      summary: Save uploaded photo metadata for a visit (max 3 per visit)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddVisitPhotoBody"
+      responses:
+        "200":
+          description: Photo saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisitPhoto"
+        "400":
+          description: Error (e.g. max photos reached)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /visits/{id}/photos/{photoId}:
+    delete:
+      operationId: deleteVisitPhoto
+      tags: [photos]
+      summary: Delete a visit photo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: photoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Photo deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /visits/{id}/photos/{photoId}/analyze:
+    post:
+      operationId: analyzeVisitPhoto
+      tags: [photos]
+      summary: Run AI head count on a visit photo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: photoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Head count result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyzePhotoResponse"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /ai-settings:
+    get:
+      operationId: getAiSettings
+      tags: [ai-settings]
+      summary: Get AI model settings
+      responses:
+        "200":
+          description: AI settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiSettings"
+    put:
+      operationId: updateAiSettings
+      tags: [ai-settings]
+      summary: Update AI model settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAiSettingsBody"
+      responses:
+        "200":
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiSettings"
 
   /profile:
     get:
@@ -628,6 +785,114 @@ components:
       required:
         - name
         - phone
+
+    RequestUploadUrlBody:
+      type: object
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        contentType:
+          type: string
+      required:
+        - name
+        - size
+        - contentType
+
+    RequestUploadUrlResponse:
+      type: object
+      properties:
+        uploadURL:
+          type: string
+        objectPath:
+          type: string
+      required:
+        - uploadURL
+        - objectPath
+
+    VisitPhoto:
+      type: object
+      properties:
+        id:
+          type: integer
+        visitId:
+          type: integer
+        objectPath:
+          type: string
+        headCount:
+          type: integer
+          nullable: true
+        aiModel:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required:
+        - id
+        - visitId
+        - objectPath
+        - createdAt
+
+    VisitPhotosResponse:
+      type: object
+      properties:
+        photos:
+          type: array
+          items:
+            $ref: "#/components/schemas/VisitPhoto"
+      required:
+        - photos
+
+    AddVisitPhotoBody:
+      type: object
+      properties:
+        objectPath:
+          type: string
+      required:
+        - objectPath
+
+    AnalyzePhotoResponse:
+      type: object
+      properties:
+        headCount:
+          type: integer
+        aiModel:
+          type: string
+        photo:
+          $ref: "#/components/schemas/VisitPhoto"
+      required:
+        - headCount
+        - aiModel
+        - photo
+
+    AiSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        provider:
+          type: string
+        modelId:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - provider
+        - modelId
+        - updatedAt
+
+    UpdateAiSettingsBody:
+      type: object
+      properties:
+        provider:
+          type: string
+        modelId:
+          type: string
+      required:
+        - provider
+        - modelId
 
     BulkNotificationResponse:
       type: object

@@ -300,6 +300,119 @@ export const UpdateTemplateResponse = zod.object({
 });
 
 /**
+ * @summary Request a presigned upload URL for object storage
+ */
+export const RequestUploadUrlBody = zod.object({
+  name: zod.string(),
+  size: zod.number(),
+  contentType: zod.string(),
+});
+
+export const RequestUploadUrlResponse = zod.object({
+  uploadURL: zod.string(),
+  objectPath: zod.string(),
+});
+
+/**
+ * @summary List photos for a visit
+ */
+export const ListVisitPhotosParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ListVisitPhotosResponse = zod.object({
+  photos: zod.array(
+    zod.object({
+      id: zod.number(),
+      visitId: zod.number(),
+      objectPath: zod.string(),
+      headCount: zod.number().nullish(),
+      aiModel: zod.string().nullish(),
+      createdAt: zod.string(),
+    }),
+  ),
+});
+
+/**
+ * @summary Save uploaded photo metadata for a visit (max 3 per visit)
+ */
+export const AddVisitPhotoParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const AddVisitPhotoBody = zod.object({
+  objectPath: zod.string(),
+});
+
+export const AddVisitPhotoResponse = zod.object({
+  id: zod.number(),
+  visitId: zod.number(),
+  objectPath: zod.string(),
+  headCount: zod.number().nullish(),
+  aiModel: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+
+/**
+ * @summary Delete a visit photo
+ */
+export const DeleteVisitPhotoParams = zod.object({
+  id: zod.coerce.number(),
+  photoId: zod.coerce.number(),
+});
+
+export const DeleteVisitPhotoResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
+
+/**
+ * @summary Run AI head count on a visit photo
+ */
+export const AnalyzeVisitPhotoParams = zod.object({
+  id: zod.coerce.number(),
+  photoId: zod.coerce.number(),
+});
+
+export const AnalyzeVisitPhotoResponse = zod.object({
+  headCount: zod.number(),
+  aiModel: zod.string(),
+  photo: zod.object({
+    id: zod.number(),
+    visitId: zod.number(),
+    objectPath: zod.string(),
+    headCount: zod.number().nullish(),
+    aiModel: zod.string().nullish(),
+    createdAt: zod.string(),
+  }),
+});
+
+/**
+ * @summary Get AI model settings
+ */
+export const GetAiSettingsResponse = zod.object({
+  id: zod.number(),
+  provider: zod.string(),
+  modelId: zod.string(),
+  updatedAt: zod.string(),
+});
+
+/**
+ * @summary Update AI model settings
+ */
+export const UpdateAiSettingsBody = zod.object({
+  provider: zod.string(),
+  modelId: zod.string(),
+});
+
+export const UpdateAiSettingsResponse = zod.object({
+  id: zod.number(),
+  provider: zod.string(),
+  modelId: zod.string(),
+  updatedAt: zod.string(),
+});
+
+/**
  * @summary Get operator profile
  */
 export const GetProfileResponse = zod.object({
