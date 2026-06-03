@@ -2,7 +2,12 @@ import { logger } from "./logger";
 
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-const TWILIO_WHATSAPP_NUMBER = process.env.TWILIO_WHATSAPP_NUMBER || "whatsapp:+14155238886";
+const RAW_WHATSAPP_NUMBER = process.env.TWILIO_WHATSAPP_NUMBER || "+14155238886";
+
+// Always ensure the from number has the whatsapp: prefix, regardless of how the secret was stored
+const TWILIO_WHATSAPP_NUMBER = RAW_WHATSAPP_NUMBER.startsWith("whatsapp:")
+  ? RAW_WHATSAPP_NUMBER
+  : `whatsapp:${RAW_WHATSAPP_NUMBER}`;
 
 export async function sendWhatsApp(to: string, message: string): Promise<{ success: boolean; error?: string }> {
   if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
@@ -14,14 +19,15 @@ export async function sendWhatsApp(to: string, message: string): Promise<{ succe
     const twilio = await import("twilio");
     const client = twilio.default(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
-    let toNumber = to.replace(/\D/g, "");
-    if (!toNumber.startsWith("+")) {
-      toNumber = "+" + toNumber;
-    }
+    // Strip everything except digits and leading +
+    const digitsOnly = to.replace(/[^\d+]/g, "").replace(/^\+?/, "+");
+    const toFormatted = `whatsapp:${digitsOnly}`;
+
+    logger.info({ from: TWILIO_WHATSAPP_NUMBER, to: toFormatted }, "Sending WhatsApp message");
 
     await client.messages.create({
       from: TWILIO_WHATSAPP_NUMBER,
-      to: `whatsapp:${toNumber}`,
+      to: toFormatted,
       body: message,
     });
 
