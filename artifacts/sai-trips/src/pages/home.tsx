@@ -320,7 +320,7 @@ export default function Home() {
                           href={
                             visit.lat && visit.lng
                               ? `https://www.google.com/maps?q=${visit.lat},${visit.lng}`
-                              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(visit.address)}`
+                              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${visit.streetAddress}, ${visit.city}, ${visit.postalCode}`)}`
                           }
                           target="_blank"
                           rel="noopener noreferrer"
@@ -328,8 +328,17 @@ export default function Home() {
                           title="Open in Google Maps"
                         >
                           <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:text-primary" />
-                          <span className="line-clamp-2 group-hover:underline">{visit.address}</span>
+                          <span className="line-clamp-2 group-hover:underline">
+                            {visit.streetAddress}, {visit.city} {visit.postalCode}
+                          </span>
                         </a>
+                        {visit.prasadOffering && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
+                              🪔 {visit.prasadOffering}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
