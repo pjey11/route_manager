@@ -605,7 +605,13 @@ components:
           type: string
         phone:
           type: string
-        address:
+        streetAddress:
+          type: string
+        city:
+          type: string
+        postalCode:
+          type: string
+        prasadOffering:
           type: string
         status:
           type: string
@@ -623,7 +629,10 @@ components:
         - visitTime
         - name
         - phone
-        - address
+        - streetAddress
+        - city
+        - postalCode
+        - prasadOffering
         - status
         - isFirst
         - isLast

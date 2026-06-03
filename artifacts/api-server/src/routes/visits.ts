@@ -19,7 +19,7 @@ import { geocodeAddress } from "../lib/geocode";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "name", "phone number", "address"];
+const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "name", "phone number", "street address", "city", "postal code", "prasad offering"];
 
 function normalizeHeader(h: string): string {
   return h.toLowerCase().trim();
@@ -33,7 +33,10 @@ function buildVisitResponse(visit: typeof visitsTable.$inferSelect, isFirst: boo
     visitTime: visit.visitTime,
     name: visit.name,
     phone: visit.phone,
-    address: visit.address,
+    streetAddress: visit.streetAddress,
+    city: visit.city,
+    postalCode: visit.postalCode,
+    prasadOffering: visit.prasadOffering,
     status: visit.status,
     isFirst,
     isLast,
@@ -141,8 +144,10 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
       const timeVal = row["Anticipated Visit Time"] ?? row["anticipated visit time"] ?? null;
       const nameVal = row["Name"] ?? row["name"] ?? null;
       const phoneVal = row["Phone Number"] ?? row["phone number"] ?? null;
-      const addrVal = row["Address"] ?? row["address"] ?? null;
-      if (dateVal == null || stopVal == null || timeVal == null || nameVal == null || phoneVal == null || addrVal == null) {
+      const streetVal = row["Street Address"] ?? row["street address"] ?? null;
+      const cityVal = row["City"] ?? row["city"] ?? null;
+      const postalVal = row["Postal Code"] ?? row["postal code"] ?? null;
+      if (dateVal == null || stopVal == null || timeVal == null || nameVal == null || phoneVal == null || streetVal == null || cityVal == null || postalVal == null) {
         return i + 1;
       }
       return null;
@@ -199,7 +204,10 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
         const rawTime = row["Anticipated Visit Time"] ?? row["anticipated visit time"];
         const name = String(row["Name"] ?? row["name"]);
         const phone = String(row["Phone Number"] ?? row["phone number"]);
-        const address = String(row["Address"] ?? row["address"]);
+        const streetAddress = String(row["Street Address"] ?? row["street address"]);
+        const city = String(row["City"] ?? row["city"]);
+        const postalCode = String(row["Postal Code"] ?? row["postal code"]);
+        const prasadOffering = String(row["Prasad Offering"] ?? row["prasad offering"] ?? "");
 
         let timeStr = String(rawTime);
         if (!isNaN(Number(rawTime))) {
@@ -214,7 +222,10 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
           visitTime: timeStr,
           name,
           phone,
-          address,
+          streetAddress,
+          city,
+          postalCode,
+          prasadOffering,
           status: "pending",
         };
       });
@@ -223,7 +234,8 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
       insertedCount += inserted.length;
 
       for (const v of inserted) {
-        geocodeAddress(v.address).then((geo) => {
+        const fullAddress = `${v.streetAddress}, ${v.city}, ${v.postalCode}`;
+        geocodeAddress(fullAddress).then((geo) => {
           if (geo) {
             db.update(visitsTable)
               .set({ lat: geo.lat, lng: geo.lng })

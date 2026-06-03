@@ -46,7 +46,10 @@ export interface Visit {
   visitTime: string;
   name: string;
   phone: string;
-  address: string;
+  streetAddress: string;
+  city: string;
+  postalCode: string;
+  prasadOffering: string;
   status: VisitStatus;
   isFirst: boolean;
   isLast: boolean;
