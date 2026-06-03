@@ -19,7 +19,7 @@ import { geocodeAddress } from "../lib/geocode";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "name", "phone number", "street address", "city", "postal code"];
+const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "name", "phone number", "street address", "city", "postal code", "prasad offering"];
 
 function normalizeHeader(h: string): string {
   return h.toLowerCase().trim();
@@ -114,7 +114,12 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
     const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    const allRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: null });
+    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: null });
+
+    // Normalize all row keys to lowercase so header casing in Excel doesn't matter
+    const allRows = rawRows.map((row) =>
+      Object.fromEntries(Object.entries(row).map(([k, v]) => [normalizeHeader(k), v]))
+    );
 
     // Strip completely blank rows (all values null) that Excel often appends
     const rows = allRows.filter((row) =>
@@ -131,7 +136,7 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
 
     if (missingCols.length > 0) {
       res.status(400).json({
-        error: `Missing required columns: ${missingCols.join(", ")}. The file must contain these columns: Date, Stop Number, Anticipated Visit Time, Name, Phone Number, Street Address, City, Postal Code. "Prasad Offering" is optional.`,
+        error: `Missing required columns: ${missingCols.join(", ")}. The file must contain all of these columns: Date, Stop Number, Anticipated Visit Time, Name, Phone Number, Street Address, City, Postal Code, Prasad Offering.`,
       });
       return;
     }
@@ -144,15 +149,16 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
     }
 
     const rowsWithNulls = rows.map((row, i) => {
-      const dateVal = row["Date"] ?? row["date"] ?? null;
-      const stopVal = row["Stop Number"] ?? row["stop number"] ?? null;
-      const timeVal = row["Anticipated Visit Time"] ?? row["anticipated visit time"] ?? null;
-      const nameVal = row["Name"] ?? row["name"] ?? null;
-      const phoneVal = row["Phone Number"] ?? row["phone number"] ?? null;
-      const streetVal = row["Street Address"] ?? row["street address"] ?? null;
-      const cityVal = row["City"] ?? row["city"] ?? null;
-      const postalVal = row["Postal Code"] ?? row["postal code"] ?? null;
-      if (dateVal == null || stopVal == null || timeVal == null || nameVal == null || phoneVal == null || streetVal == null || cityVal == null || postalVal == null) {
+      const dateVal = row["date"] ?? null;
+      const stopVal = row["stop number"] ?? null;
+      const timeVal = row["anticipated visit time"] ?? null;
+      const nameVal = row["name"] ?? null;
+      const phoneVal = row["phone number"] ?? null;
+      const streetVal = row["street address"] ?? null;
+      const cityVal = row["city"] ?? null;
+      const postalVal = row["postal code"] ?? null;
+      const prasadVal = row["prasad offering"] ?? null;
+      if (dateVal == null || stopVal == null || timeVal == null || nameVal == null || phoneVal == null || streetVal == null || cityVal == null || postalVal == null || prasadVal == null) {
         return i + 1;
       }
       return null;
@@ -167,7 +173,7 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
 
     const groupedByDate = new Map<string, typeof rows>();
     for (const row of rows) {
-      const rawDate = row["Date"] ?? row["date"];
+      const rawDate = row["date"];
       let dateStr: string;
       if (typeof rawDate === "number") {
         const d = XLSX.SSF.parse_date_code(rawDate);
@@ -205,14 +211,14 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
       if (!firstDate) firstDate = dateStr;
 
       const visitInserts = dateRows.map((row) => {
-        const rawStop = row["Stop Number"] ?? row["stop number"];
-        const rawTime = row["Anticipated Visit Time"] ?? row["anticipated visit time"];
-        const name = String(row["Name"] ?? row["name"]);
-        const phone = String(row["Phone Number"] ?? row["phone number"]);
-        const streetAddress = String(row["Street Address"] ?? row["street address"]);
-        const city = String(row["City"] ?? row["city"]);
-        const postalCode = String(row["Postal Code"] ?? row["postal code"]);
-        const prasadOffering = String(row["Prasad Offering"] ?? row["prasad offering"] ?? "");
+        const rawStop = row["stop number"];
+        const rawTime = row["anticipated visit time"];
+        const name = String(row["name"]);
+        const phone = String(row["phone number"]);
+        const streetAddress = String(row["street address"]);
+        const city = String(row["city"]);
+        const postalCode = String(row["postal code"]);
+        const prasadOffering = String(row["prasad offering"] ?? "");
 
         let timeStr = String(rawTime);
         if (!isNaN(Number(rawTime))) {
