@@ -19,7 +19,7 @@ import { geocodeAddress } from "../lib/geocode";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "name", "phone number", "street address", "city", "postal code", "prasad offering"];
+const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "name", "phone number", "street address", "city", "postal code"];
 
 function normalizeHeader(h: string): string {
   return h.toLowerCase().trim();
@@ -114,7 +114,12 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
     const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: null });
+    const allRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: null });
+
+    // Strip completely blank rows (all values null) that Excel often appends
+    const rows = allRows.filter((row) =>
+      Object.values(row).some((v) => v !== null && v !== "")
+    );
 
     if (rows.length === 0) {
       res.status(400).json({ error: "The uploaded file contains no data rows." });
@@ -126,7 +131,7 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
 
     if (missingCols.length > 0) {
       res.status(400).json({
-        error: `Missing required columns: ${missingCols.join(", ")}. The file must contain exactly these columns: Date, Stop Number, Anticipated Visit Time, Name, Phone Number, Address.`,
+        error: `Missing required columns: ${missingCols.join(", ")}. The file must contain these columns: Date, Stop Number, Anticipated Visit Time, Name, Phone Number, Street Address, City, Postal Code. "Prasad Offering" is optional.`,
       });
       return;
     }
