@@ -1,20 +1,11 @@
 import { eq, and, asc } from "drizzle-orm";
-import { db, visitsTable, uploadBatchesTable, profileTable } from "@workspace/db";
-import { sendWhatsApp } from "./whatsapp";
+import { db, visitsTable, uploadBatchesTable } from "@workspace/db";
+import { sendGroupMessage } from "./whatsapp";
 import { logger } from "./logger";
 
 const CHECK_INTERVAL_MS = 60 * 1000;
 
-async function getAdminPhone(): Promise<string | null> {
-  const rows = await db.select().from(profileTable).where(eq(profileTable.id, 1)).limit(1);
-  const phone = rows[0]?.phone?.trim();
-  return phone || null;
-}
-
 async function checkAndSendAdminReminder(): Promise<void> {
-  const adminPhone = await getAdminPhone();
-  if (!adminPhone) return;
-
   const today = new Date().toISOString().split("T")[0];
   const now = new Date();
 
@@ -62,16 +53,17 @@ async function checkAndSendAdminReminder(): Promise<void> {
   const diffMinutes = diffMs / 60000;
 
   if (diffMinutes >= 28 && diffMinutes <= 32) {
-    logger.info({ visitTime: visit.visitTime, name: visit.name }, "Sending 30-min admin reminder via WhatsApp");
+    logger.info({ visitTime: visit.visitTime, name: visit.name }, "Sending 30-min admin reminder to WhatsApp group");
 
+    const fullAddress = `${visit.streetAddress}, ${visit.city} ${visit.postalCode}`;
     const message =
-      `OmSaiRam! Reminder: The first Sai Palki visit of the day is in 30 minutes.\n\n` +
+      `🔔 OmSaiRam! Reminder: Sai Palki starts in 30 minutes.\n\n` +
       `First stop: ${visit.name}\n` +
       `Time: ${visit.visitTime}\n` +
-      `Address: ${visit.address}\n\n` +
-      `Please prepare and notify the devotee. Jai Sairam!`;
+      `Address: ${fullAddress}\n\n` +
+      `Please prepare the route. Jai Sairam!`;
 
-    const result = await sendWhatsApp(adminPhone, message);
+    const result = await sendGroupMessage(message);
 
     await db
       .update(uploadBatchesTable)
@@ -79,9 +71,9 @@ async function checkAndSendAdminReminder(): Promise<void> {
       .where(eq(uploadBatchesTable.id, batch.id));
 
     if (result.success) {
-      logger.info("Admin WhatsApp reminder sent successfully");
+      logger.info("Admin WhatsApp group reminder sent successfully");
     } else {
-      logger.warn({ error: result.error }, "Admin WhatsApp reminder failed to send");
+      logger.warn({ error: result.error }, "Admin WhatsApp group reminder failed to send");
     }
   }
 }

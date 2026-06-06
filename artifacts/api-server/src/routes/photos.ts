@@ -10,7 +10,7 @@ const objectStorageService = new ObjectStorageService();
 const MAX_PHOTOS = 3;
 
 router.get("/visits/:id/photos", requireAuth, async (req, res): Promise<void> => {
-  const visitId = parseInt(req.params["id"] ?? "0");
+  const visitId = parseInt(String(req.params["id"] ?? "0"));
   if (!visitId) { res.status(400).json({ error: "Invalid visit id" }); return; }
 
   const photos = await db.select().from(visitPhotosTable)
@@ -30,7 +30,7 @@ router.get("/visits/:id/photos", requireAuth, async (req, res): Promise<void> =>
 });
 
 router.post("/visits/:id/photos", requireAuth, async (req, res): Promise<void> => {
-  const visitId = parseInt(req.params["id"] ?? "0");
+  const visitId = parseInt(String(req.params["id"] ?? "0"));
   if (!visitId) { res.status(400).json({ error: "Invalid visit id" }); return; }
 
   const { objectPath } = req.body as { objectPath?: string };
@@ -64,8 +64,8 @@ router.post("/visits/:id/photos", requireAuth, async (req, res): Promise<void> =
 });
 
 router.delete("/visits/:id/photos/:photoId", requireAuth, async (req, res): Promise<void> => {
-  const visitId = parseInt(req.params["id"] ?? "0");
-  const photoId = parseInt(req.params["photoId"] ?? "0");
+  const visitId = parseInt(String(req.params["id"] ?? "0"));
+  const photoId = parseInt(String(req.params["photoId"] ?? "0"));
   if (!visitId || !photoId) { res.status(400).json({ error: "Invalid id" }); return; }
 
   await db.delete(visitPhotosTable)
@@ -75,8 +75,8 @@ router.delete("/visits/:id/photos/:photoId", requireAuth, async (req, res): Prom
 });
 
 router.post("/visits/:id/photos/:photoId/analyze", requireAuth, async (req, res): Promise<void> => {
-  const visitId = parseInt(req.params["id"] ?? "0");
-  const photoId = parseInt(req.params["photoId"] ?? "0");
+  const visitId = parseInt(String(req.params["id"] ?? "0"));
+  const photoId = parseInt(String(req.params["photoId"] ?? "0"));
   if (!visitId || !photoId) { res.status(400).json({ error: "Invalid id" }); return; }
 
   const photos = await db.select().from(visitPhotosTable)
