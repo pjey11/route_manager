@@ -337,22 +337,14 @@ router.post("/visits/:id/complete", requireAuth, async (req, res): Promise<void>
 
   const template3 = await getTemplate(3);
   const thankMsg = applyTemplate(template3, visit);
-  const waResult1 = await sendGroupMessage(thankMsg);
-
-  let waResult2: { success: boolean; error?: string } = { success: true };
-  if (idx < allVisits.length - 1) {
-    const nextVisit = allVisits[idx + 1];
-    const template1 = await getTemplate(1);
-    const arrivalMsg = applyTemplate(template1, nextVisit);
-    waResult2 = await sendGroupMessage(arrivalMsg);
-  }
+  const waResult = await sendGroupMessage(thankMsg);
 
   res.json({
     success: true,
     message: "Visit completed",
     visit: buildVisitResponse(updated, idx === 0, idx === allVisits.length - 1),
-    whatsappSent: waResult1.success && waResult2.success,
-    whatsappError: waResult1.error || waResult2.error,
+    whatsappSent: waResult.success,
+    whatsappError: waResult.error,
   });
 });
 
