@@ -10,40 +10,38 @@ const DEFAULT_TEMPLATES = [
   {
     id: 1,
     name: "Arrival Notice",
-    description: "Sent when 'Sai Palki starts' — informs the contact we are on our way",
-    content: "OmSaiRam, dear {name}. We are on our way to your home and will arrive shortly. Please be ready to receive Sai Palki's blessings.",
+    description: "Sent when 'Sai Palki starts' — group notification that Palki is on the way",
+    content: "🙏 OmSaiRam! Sai Palki is on the way to {name}'s home at {address}. Jai Sairam!",
   },
   {
     id: 2,
     name: "2 Minutes Away",
-    description: "Sent via geofencing — informs the contact we are very close",
-    content: "OmSaiRam, dear {name}. We are 2-3 minutes away from your home. Palki is arriving very soon!",
+    description: "Sent via geofencing — group notification that Palki is almost there",
+    content: "🙏 OmSaiRam! Sai Palki is 2-3 minutes away from {name}'s home at {address}. Please be ready to receive the Palki!",
   },
   {
     id: 3,
     name: "Thank You",
-    description: "Sent after visit completion — thanks the contact for Biksha",
-    content: "OmSaiRam, dear {name}. We have received Biksha at your home. Thank you for your devotion and blessing. May Sai shower his grace upon you and your family.",
+    description: "Sent after visit completion — group notification that Bikhsa was received",
+    content: "✅ OmSaiRam! Bikhsa has been received at {name}'s home ({prasad}). Sai Palki continues its blessed journey. Jai Sairam!",
   },
   {
     id: 4,
-    name: "Bulk Instructions",
-    description: "Sent to all contacts for a day — standard instructions",
-    content: "OmSaiRam! Please be informed that Sai Palki will be visiting your home today as scheduled. Please ensure you are available at the appointed time and that the area is clean and prepared for the blessed visit. Thank you for your devotion. Jai Sairam!",
+    name: "Bulk Schedule",
+    description: "Sent as day-start announcement — group summary of today's route (built automatically from visit data)",
+    content: "🙏 OmSaiRam! Today's Sai Palki route schedule will be shared shortly. Please be ready at your appointed time. Jai Sairam!",
   },
 ];
 
 async function ensureTemplatesExist() {
   for (const tmpl of DEFAULT_TEMPLATES) {
-    const existing = await db.select().from(notificationTemplatesTable).where(eq(notificationTemplatesTable.id, tmpl.id));
-    if (existing.length === 0) {
-      await db.insert(notificationTemplatesTable).values({
-        id: tmpl.id,
-        name: tmpl.name,
-        description: tmpl.description,
-        content: tmpl.content,
+    await db
+      .insert(notificationTemplatesTable)
+      .values({ id: tmpl.id, name: tmpl.name, description: tmpl.description, content: tmpl.content })
+      .onConflictDoUpdate({
+        target: notificationTemplatesTable.id,
+        set: { name: tmpl.name, description: tmpl.description, content: tmpl.content },
       });
-    }
   }
 }
 
