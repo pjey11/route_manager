@@ -13,7 +13,7 @@ import {
   SendGeofenceMessageParams,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/requireAuth";
-import { sendWhatsApp } from "../lib/whatsapp";
+import { sendGroupMessage } from "../lib/whatsapp";
 import { geocodeAddress } from "../lib/geocode";
 
 const router: IRouter = Router();
@@ -51,8 +51,12 @@ async function getTemplate(id: number): Promise<string> {
   return tmpl?.content || "";
 }
 
-function applyTemplate(content: string, name: string): string {
-  return content.replace(/\{name\}/g, name);
+function applyTemplate(content: string, visit: { name: string; streetAddress: string; city: string; postalCode: string; prasadOffering: string }): string {
+  const fullAddress = `${visit.streetAddress}, ${visit.city} ${visit.postalCode}`;
+  return content
+    .replace(/\{name\}/g, visit.name)
+    .replace(/\{address\}/g, fullAddress)
+    .replace(/\{prasad\}/g, visit.prasadOffering);
 }
 
 router.get("/visits/dates", requireAuth, async (_req, res): Promise<void> => {
@@ -295,8 +299,8 @@ router.post("/visits/:id/start", requireAuth, async (req, res): Promise<void> =>
   const idx = allVisits.findIndex((v) => v.id === id);
 
   const templateContent = await getTemplate(1);
-  const message = applyTemplate(templateContent, visit.name);
-  const waResult = await sendWhatsApp(visit.phone, message);
+  const message = applyTemplate(templateContent, visit);
+  const waResult = await sendGroupMessage(message);
 
   res.json({
     success: true,
@@ -332,15 +336,15 @@ router.post("/visits/:id/complete", requireAuth, async (req, res): Promise<void>
   const idx = allVisits.findIndex((v) => v.id === id);
 
   const template3 = await getTemplate(3);
-  const thankMsg = applyTemplate(template3, visit.name);
-  const waResult1 = await sendWhatsApp(visit.phone, thankMsg);
+  const thankMsg = applyTemplate(template3, visit);
+  const waResult1 = await sendGroupMessage(thankMsg);
 
-  let waResult2 = { success: false, error: "No next visit" };
+  let waResult2: { success: boolean; error?: string } = { success: true };
   if (idx < allVisits.length - 1) {
     const nextVisit = allVisits[idx + 1];
     const template1 = await getTemplate(1);
-    const arrivalMsg = applyTemplate(template1, nextVisit.name);
-    waResult2 = await sendWhatsApp(nextVisit.phone, arrivalMsg);
+    const arrivalMsg = applyTemplate(template1, nextVisit);
+    waResult2 = await sendGroupMessage(arrivalMsg);
   }
 
   res.json({
@@ -377,8 +381,8 @@ router.post("/visits/:id/end", requireAuth, async (req, res): Promise<void> => {
   const idx = allVisits.findIndex((v) => v.id === id);
 
   const template3 = await getTemplate(3);
-  const thankMsg = applyTemplate(template3, visit.name);
-  const waResult = await sendWhatsApp(visit.phone, thankMsg);
+  const thankMsg = applyTemplate(template3, visit);
+  const waResult = await sendGroupMessage(thankMsg);
 
   res.json({
     success: true,
@@ -448,7 +452,7 @@ router.post("/visits/:id/geofence-alert", requireAuth, async (req, res): Promise
   const idx = allVisits.findIndex((v) => v.id === id);
 
   const template2 = await getTemplate(2);
-  const message = applyTemplate(template2, visit.name);
+  const message = applyTemplate(template2, visit);
 
   res.json({
     shouldSendMessage: true,
@@ -479,8 +483,8 @@ router.post("/visits/:id/send-geofence", requireAuth, async (req, res): Promise<
   const idx = allVisits.findIndex((v) => v.id === id);
 
   const template2 = await getTemplate(2);
-  const message = applyTemplate(template2, visit.name);
-  const waResult = await sendWhatsApp(visit.phone, message);
+  const message = applyTemplate(template2, visit);
+  const waResult = await sendGroupMessage(message);
 
   res.json({
     success: waResult.success,

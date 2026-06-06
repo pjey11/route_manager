@@ -1,9 +1,9 @@
 import { Router, type IRouter } from "express";
 import { eq, asc } from "drizzle-orm";
-import { db, visitsTable, notificationTemplatesTable } from "@workspace/db";
+import { db, visitsTable } from "@workspace/db";
 import { SendBulkNotificationBody } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/requireAuth";
-import { sendWhatsApp } from "../lib/whatsapp";
+import { sendGroupMessage } from "../lib/whatsapp";
 
 const router: IRouter = Router();
 
@@ -27,31 +27,25 @@ router.post("/notifications/bulk", requireAuth, async (req, res): Promise<void> 
     return;
   }
 
-  const [template] = await db
-    .select()
-    .from(notificationTemplatesTable)
-    .where(eq(notificationTemplatesTable.id, 4));
+  const stopLines = visits
+    .map((v) => `  ${v.stopNumber}. ${v.name} — ${v.visitTime} — ${v.streetAddress}, ${v.city}`)
+    .join("\n");
 
-  const message = template?.content || "OmSaiRam! Sai Palki will visit your home today as scheduled. Please be ready at the appointed time.";
+  const message =
+    `🙏 OmSaiRam! Today's Sai Palki route (${date}):\n\n` +
+    `${stopLines}\n\n` +
+    `Please keep your home ready at the appointed time. Jai Sairam!`;
 
-  let sent = 0;
-  let failed = 0;
-
-  for (const visit of visits) {
-    const result = await sendWhatsApp(visit.phone, message);
-    if (result.success) {
-      sent++;
-    } else {
-      failed++;
-    }
-  }
+  const result = await sendGroupMessage(message);
 
   res.json({
-    success: failed === 0,
-    sent,
-    failed,
-    total: visits.length,
-    message: `Sent ${sent} of ${visits.length} messages${failed > 0 ? ` (${failed} failed)` : ""}.`,
+    success: result.success,
+    sent: result.success ? 1 : 0,
+    failed: result.success ? 0 : 1,
+    total: 1,
+    message: result.success
+      ? `Route notification sent to the WhatsApp group for ${visits.length} stops.`
+      : `Failed to send group notification: ${result.error}`,
   });
 });
 
