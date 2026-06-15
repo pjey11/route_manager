@@ -14,12 +14,6 @@ const DEFAULT_TEMPLATES = [
     content: "OmSaiRam! Palki is starting for the day. Baba will arrive at {address} soon for Biksha. Jai Sairam!",
   },
   {
-    id: 2,
-    name: "2 Minutes Away",
-    description: "Sent via geofencing — group notification that Palki is almost at the current home",
-    content: "OmSaiRam! Sai Palki is 2-3 minutes away. Please be ready to receive the Palki at {address}. Jai Sairam!",
-  },
-  {
     id: 3,
     name: "Thank You & Next Home",
     description: "Sent after each visit — announces Biksha received and next stop address to the group",

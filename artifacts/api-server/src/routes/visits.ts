@@ -9,8 +9,6 @@ import {
   CompleteVisitParams,
   EndVisitParams,
   EndDayParams,
-  GeofenceAlertParams,
-  SendGeofenceMessageParams,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/requireAuth";
 import { sendGroupMessage } from "../lib/whatsapp";
@@ -439,71 +437,6 @@ router.post("/visits/:id/end-day", requireAuth, async (req, res): Promise<void> 
     success: true,
     message: "Day ended",
     visit: buildVisitResponse(updated, idx === 0, idx === allVisits.length - 1),
-    whatsappSent: waResult.success,
-    whatsappError: waResult.error,
-  });
-});
-
-router.post("/visits/:id/geofence-alert", requireAuth, async (req, res): Promise<void> => {
-  const parsed = GeofenceAlertParams.safeParse(req.params);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid visit ID" });
-    return;
-  }
-  const id = parsed.data.id;
-
-  const [visit] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
-  if (!visit) {
-    res.status(404).json({ error: "Visit not found" });
-    return;
-  }
-
-  const allVisits = await db
-    .select()
-    .from(visitsTable)
-    .where(eq(visitsTable.date, visit.date))
-    .orderBy(asc(visitsTable.stopNumber));
-  const idx = allVisits.findIndex((v) => v.id === id);
-
-  const template2 = await getTemplate(2);
-  const message = applyTemplate(template2, visit);
-
-  res.json({
-    shouldSendMessage: true,
-    message,
-    visit: buildVisitResponse(visit, idx === 0, idx === allVisits.length - 1),
-  });
-});
-
-router.post("/visits/:id/send-geofence", requireAuth, async (req, res): Promise<void> => {
-  const parsed = SendGeofenceMessageParams.safeParse(req.params);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid visit ID" });
-    return;
-  }
-  const id = parsed.data.id;
-
-  const [visit] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
-  if (!visit) {
-    res.status(404).json({ error: "Visit not found" });
-    return;
-  }
-
-  const allVisits = await db
-    .select()
-    .from(visitsTable)
-    .where(eq(visitsTable.date, visit.date))
-    .orderBy(asc(visitsTable.stopNumber));
-  const idx = allVisits.findIndex((v) => v.id === id);
-
-  const template2 = await getTemplate(2);
-  const message = applyTemplate(template2, visit);
-  const waResult = await sendGroupMessage(message);
-
-  res.json({
-    success: waResult.success,
-    message: waResult.success ? "Arrival notice sent" : `Failed: ${waResult.error}`,
-    visit: buildVisitResponse(visit, idx === 0, idx === allVisits.length - 1),
     whatsappSent: waResult.success,
     whatsappError: waResult.error,
   });
