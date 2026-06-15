@@ -83,10 +83,17 @@ export default function Notifications() {
                   placeholder="Enter message template..."
                 />
                 
-                <div className="mt-auto flex items-center justify-between">
-                  <div className="flex items-center text-xs text-muted-foreground bg-primary/5 text-primary px-3 py-1.5 rounded-full border border-primary/10">
-                    <Info className="w-3.5 h-3.5 mr-1.5" />
-                    <span><code className="font-semibold px-1 py-0.5 bg-background rounded">{'{name}'}</code> will be replaced with devotee name</span>
+                <div className="mt-auto flex items-center justify-between gap-3">
+                  <div className="flex items-start gap-1.5 text-xs text-muted-foreground bg-primary/5 text-primary px-3 py-1.5 rounded-lg border border-primary/10">
+                    <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                    <span>
+                      <code className="font-semibold px-1 py-0.5 bg-background rounded">{'{address}'}</code>{" "}
+                      current stop &nbsp;·&nbsp;{" "}
+                      <code className="font-semibold px-1 py-0.5 bg-background rounded">{'{address_next}'}</code>{" "}
+                      next stop &nbsp;·&nbsp;{" "}
+                      <code className="font-semibold px-1 py-0.5 bg-background rounded">{'{prasad}'}</code>{" "}
+                      offering
+                    </span>
                   </div>
                   <Button 
                     size="sm" 
