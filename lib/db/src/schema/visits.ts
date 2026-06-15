@@ -17,7 +17,7 @@ export const visitsTable = pgTable("visits", {
   date: text("date").notNull(),
   stopNumber: integer("stop_number").notNull(),
   visitTime: text("visit_time").notNull(),
-  name: text("name").notNull(),
+  name: text("name").notNull().default(""),
   phone: text("phone").notNull(),
   streetAddress: text("street_address").notNull(),
   city: text("city").notNull(),

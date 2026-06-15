@@ -28,7 +28,7 @@ router.post("/notifications/bulk", requireAuth, async (req, res): Promise<void> 
   }
 
   const stopLines = visits
-    .map((v) => `  ${v.stopNumber}. ${v.name} — ${v.visitTime} — ${v.streetAddress}, ${v.city}`)
+    .map((v) => `  ${v.stopNumber}. ${v.visitTime} — ${v.streetAddress}, ${v.city}`)
     .join("\n");
 
   const message =

@@ -17,7 +17,7 @@ const DEFAULT_TEMPLATES = [
     id: 2,
     name: "2 Minutes Away",
     description: "Sent via geofencing — group notification that Palki is almost at the current home",
-    content: "🙏 OmSaiRam! Sai Palki is 2-3 minutes away from {name}'s home at {address}. Please be ready to receive the Palki!",
+    content: "OmSaiRam! Sai Palki is 2-3 minutes away. Please be ready to receive the Palki at {address}. Jai Sairam!",
   },
   {
     id: 3,

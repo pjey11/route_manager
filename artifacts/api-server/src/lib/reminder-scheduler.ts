@@ -58,9 +58,8 @@ async function checkAndSendAdminReminder(): Promise<void> {
     const fullAddress = `${visit.streetAddress}, ${visit.city} ${visit.postalCode}`;
     const message =
       `🔔 OmSaiRam! Reminder: Sai Palki starts in 30 minutes.\n\n` +
-      `First stop: ${visit.name}\n` +
-      `Time: ${visit.visitTime}\n` +
-      `Address: ${fullAddress}\n\n` +
+      `First stop: ${fullAddress}\n` +
+      `Time: ${visit.visitTime}\n\n` +
       `Please prepare the route. Jai Sairam!`;
 
     const result = await sendGroupMessage(message);
