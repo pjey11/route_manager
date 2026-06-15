@@ -10,26 +10,26 @@ const DEFAULT_TEMPLATES = [
   {
     id: 1,
     name: "Arrival Notice",
-    description: "Sent when 'Sai Palki starts' — group notification that Palki is on the way",
-    content: "🙏 OmSaiRam! Sai Palki is on the way to {name}'s home at {address}. Jai Sairam!",
+    description: "Sent when Palki starts for the day — announces first home's address to the group",
+    content: "OmSaiRam! Palki is starting for the day. Baba will arrive at {address} soon for Biksha. Jai Sairam!",
   },
   {
     id: 2,
     name: "2 Minutes Away",
-    description: "Sent via geofencing — group notification that Palki is almost there",
+    description: "Sent via geofencing — group notification that Palki is almost at the current home",
     content: "🙏 OmSaiRam! Sai Palki is 2-3 minutes away from {name}'s home at {address}. Please be ready to receive the Palki!",
   },
   {
     id: 3,
-    name: "Thank You",
-    description: "Sent after visit completion — group notification that Bikhsa was received",
-    content: "✅ OmSaiRam! Bikhsa has been received at {name}'s home ({prasad}). Sai Palki continues its blessed journey. Jai Sairam!",
+    name: "Thank You & Next Home",
+    description: "Sent after each visit — announces Biksha received and next stop address to the group",
+    content: "OmSaiRam! Palki arrived at {address}. The next home is {address_next}. Jai Sairam!",
   },
   {
     id: 4,
-    name: "Bulk Schedule",
-    description: "Sent as day-start announcement — group summary of today's route (built automatically from visit data)",
-    content: "🙏 OmSaiRam! Today's Sai Palki route schedule will be shared shortly. Please be ready at your appointed time. Jai Sairam!",
+    name: "Finishing for the Day",
+    description: "Sent after the last visit or when day is ended — closes out the route for the group",
+    content: "OmSaiRam! Palki for the day is completed. Sai Palki will continue its blessed journey tomorrow. Jai Sairam!",
   },
 ];
 
