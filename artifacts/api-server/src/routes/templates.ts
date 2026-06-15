@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { eq, notInArray } from "drizzle-orm";
 import { db, notificationTemplatesTable } from "@workspace/db";
 import { UpdateTemplateParams, UpdateTemplateBody } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/requireAuth";
@@ -27,15 +27,26 @@ const DEFAULT_TEMPLATES = [
   },
 ];
 
+const ALLOWED_TEMPLATE_IDS = DEFAULT_TEMPLATES.map((t) => t.id);
+
 async function ensureTemplatesExist() {
+  await db
+    .delete(notificationTemplatesTable)
+    .where(notInArray(notificationTemplatesTable.id, ALLOWED_TEMPLATE_IDS));
+
   for (const tmpl of DEFAULT_TEMPLATES) {
-    await db
-      .insert(notificationTemplatesTable)
-      .values({ id: tmpl.id, name: tmpl.name, description: tmpl.description, content: tmpl.content })
-      .onConflictDoUpdate({
-        target: notificationTemplatesTable.id,
-        set: { name: tmpl.name, description: tmpl.description, content: tmpl.content },
+    const existing = await db
+      .select({ id: notificationTemplatesTable.id })
+      .from(notificationTemplatesTable)
+      .where(eq(notificationTemplatesTable.id, tmpl.id));
+    if (existing.length === 0) {
+      await db.insert(notificationTemplatesTable).values({
+        id: tmpl.id,
+        name: tmpl.name,
+        description: tmpl.description,
+        content: tmpl.content,
       });
+    }
   }
 }
 
