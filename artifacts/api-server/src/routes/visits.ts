@@ -19,7 +19,7 @@ import { geocodeAddress } from "../lib/geocode";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "name", "phone number", "street address", "city", "postal code", "prasad offering"];
+const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "phone number", "street address", "city", "postal code", "prasad offering"];
 
 function normalizeHeader(h: string): string {
   return h.toLowerCase().trim();
@@ -51,7 +51,7 @@ async function getTemplate(id: number): Promise<string> {
   return tmpl?.content || "";
 }
 
-type VisitFields = { name: string; streetAddress: string; city: string; postalCode: string; prasadOffering: string };
+type VisitFields = { streetAddress: string; city: string; postalCode: string; prasadOffering: string };
 
 function formatAddress(v: VisitFields): string {
   return `${v.streetAddress}, ${v.city} ${v.postalCode}`;
@@ -60,7 +60,6 @@ function formatAddress(v: VisitFields): string {
 function applyTemplate(content: string, visit: VisitFields, nextVisit?: VisitFields): string {
   const nextAddress = nextVisit ? formatAddress(nextVisit) : "";
   return content
-    .replace(/\{name\}/g, visit.name)
     .replace(/\{address\}/g, formatAddress(visit))
     .replace(/\{address_next\}/g, nextAddress)
     .replace(/\{prasad\}/g, visit.prasadOffering);
@@ -163,13 +162,12 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
       const dateVal = row["date"] ?? null;
       const stopVal = row["stop number"] ?? null;
       const timeVal = row["anticipated visit time"] ?? null;
-      const nameVal = row["name"] ?? null;
       const phoneVal = row["phone number"] ?? null;
       const streetVal = row["street address"] ?? null;
       const cityVal = row["city"] ?? null;
       const postalVal = row["postal code"] ?? null;
       const prasadVal = row["prasad offering"] ?? null;
-      if (dateVal == null || stopVal == null || timeVal == null || nameVal == null || phoneVal == null || streetVal == null || cityVal == null || postalVal == null || prasadVal == null) {
+      if (dateVal == null || stopVal == null || timeVal == null || phoneVal == null || streetVal == null || cityVal == null || postalVal == null || prasadVal == null) {
         return i + 1;
       }
       return null;
@@ -224,7 +222,6 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
       const visitInserts = dateRows.map((row) => {
         const rawStop = row["stop number"];
         const rawTime = row["anticipated visit time"];
-        const name = String(row["name"]);
         const phone = String(row["phone number"]);
         const streetAddress = String(row["street address"]);
         const city = String(row["city"]);
@@ -242,7 +239,7 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
           date: dateStr,
           stopNumber: parseInt(String(rawStop), 10),
           visitTime: timeStr,
-          name,
+          name: "",
           phone,
           streetAddress,
           city,
