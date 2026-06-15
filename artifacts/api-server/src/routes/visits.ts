@@ -51,11 +51,18 @@ async function getTemplate(id: number): Promise<string> {
   return tmpl?.content || "";
 }
 
-function applyTemplate(content: string, visit: { name: string; streetAddress: string; city: string; postalCode: string; prasadOffering: string }): string {
-  const fullAddress = `${visit.streetAddress}, ${visit.city} ${visit.postalCode}`;
+type VisitFields = { name: string; streetAddress: string; city: string; postalCode: string; prasadOffering: string };
+
+function formatAddress(v: VisitFields): string {
+  return `${v.streetAddress}, ${v.city} ${v.postalCode}`;
+}
+
+function applyTemplate(content: string, visit: VisitFields, nextVisit?: VisitFields): string {
+  const nextAddress = nextVisit ? formatAddress(nextVisit) : "";
   return content
     .replace(/\{name\}/g, visit.name)
-    .replace(/\{address\}/g, fullAddress)
+    .replace(/\{address\}/g, formatAddress(visit))
+    .replace(/\{address_next\}/g, nextAddress)
     .replace(/\{prasad\}/g, visit.prasadOffering);
 }
 
@@ -335,14 +342,21 @@ router.post("/visits/:id/complete", requireAuth, async (req, res): Promise<void>
     .orderBy(asc(visitsTable.stopNumber));
   const idx = allVisits.findIndex((v) => v.id === id);
 
-  const template3 = await getTemplate(3);
-  const thankMsg = applyTemplate(template3, visit);
-  const waResult = await sendGroupMessage(thankMsg);
+  const isLast = idx === allVisits.length - 1;
+  let waMsg: string;
+  if (isLast) {
+    waMsg = await getTemplate(4);
+  } else {
+    const nextVisit = allVisits[idx + 1];
+    const tmpl3 = await getTemplate(3);
+    waMsg = applyTemplate(tmpl3, visit, nextVisit);
+  }
+  const waResult = await sendGroupMessage(waMsg);
 
   res.json({
     success: true,
     message: "Visit completed",
-    visit: buildVisitResponse(updated, idx === 0, idx === allVisits.length - 1),
+    visit: buildVisitResponse(updated, idx === 0, isLast),
     whatsappSent: waResult.success,
     whatsappError: waResult.error,
   });
@@ -372,14 +386,21 @@ router.post("/visits/:id/end", requireAuth, async (req, res): Promise<void> => {
     .orderBy(asc(visitsTable.stopNumber));
   const idx = allVisits.findIndex((v) => v.id === id);
 
-  const template3 = await getTemplate(3);
-  const thankMsg = applyTemplate(template3, visit);
-  const waResult = await sendGroupMessage(thankMsg);
+  const isLast = idx === allVisits.length - 1;
+  let waMsg: string;
+  if (isLast) {
+    waMsg = await getTemplate(4);
+  } else {
+    const nextVisit = allVisits[idx + 1];
+    const tmpl3 = await getTemplate(3);
+    waMsg = applyTemplate(tmpl3, visit, nextVisit);
+  }
+  const waResult = await sendGroupMessage(waMsg);
 
   res.json({
     success: true,
     message: "Visit ended",
-    visit: buildVisitResponse(updated, idx === 0, idx === allVisits.length - 1),
+    visit: buildVisitResponse(updated, idx === 0, isLast),
     whatsappSent: waResult.success,
     whatsappError: waResult.error,
   });
@@ -414,11 +435,15 @@ router.post("/visits/:id/end-day", requireAuth, async (req, res): Promise<void> 
     .orderBy(asc(visitsTable.stopNumber));
   const idx = allVisits.findIndex((v) => v.id === id);
 
+  const endMsg = await getTemplate(4);
+  const waResult = await sendGroupMessage(endMsg);
+
   res.json({
     success: true,
     message: "Day ended",
     visit: buildVisitResponse(updated, idx === 0, idx === allVisits.length - 1),
-    whatsappSent: false,
+    whatsappSent: waResult.success,
+    whatsappError: waResult.error,
   });
 });
 
