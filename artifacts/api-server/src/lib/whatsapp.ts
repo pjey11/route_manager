@@ -21,7 +21,7 @@ export async function sendGroupMessage(message: string): Promise<{ success: bool
       return { success: false, error: `Webhook error ${response.status}: ${body}` };
     }
 
-    logger.info("WhatsApp group message sent via Make.com");
+    logger.info({ message }, "WhatsApp group message sent via Make.com");
     return { success: true };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
