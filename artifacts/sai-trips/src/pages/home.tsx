@@ -6,7 +6,6 @@ import {
   useListVisitDates,
   useStartVisit,
   useCompleteVisit,
-  useEndVisit,
   useEndDay,
   type Visit,
 } from "@workspace/api-client-react";
@@ -16,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
-import { Lock, MapPin, Phone, Clock, Upload, CheckCircle2, Check } from "lucide-react";
+import { Lock, MapPin, Phone, Clock, Upload, CheckCircle2, Check, Bell, ArrowRight, Heart } from "lucide-react";
 import { VisitPhotos } from "@/components/visit-photos";
 
 export default function Home() {
@@ -33,7 +32,6 @@ export default function Home() {
   const uploadMutation = useUploadVisits();
   const startMutation = useStartVisit();
   const completeMutation = useCompleteVisit();
-  const endMutation = useEndVisit();
   const endDayMutation = useEndDay();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,9 +39,6 @@ export default function Home() {
     if (!file) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
     uploadMutation.mutate(
       { data: { file } },
       {
@@ -69,66 +64,53 @@ export default function Home() {
     queryClient.invalidateQueries({ queryKey: getListVisitsQueryKey({ date: selectedDate }) });
   };
 
-  const handleStart = (visit: Visit) => {
+  const handleArrivalNotice = (firstVisit: Visit) => {
     startMutation.mutate(
-      { id: visit.id },
+      { id: firstVisit.id },
       {
         onSuccess: (res) => {
           invalidateList();
           if (res.whatsappSent) {
-            toast.success(`Arrival notice sent to ${visit.name}`);
+            toast.success("Arrival notice sent to the group. OmSaiRam!");
           } else {
-            toast.warning(`Visit started${res.whatsappError ? ` — WhatsApp: ${res.whatsappError}` : " (WhatsApp not configured)"}`);
+            toast.warning(`Arrival notice sent${res.whatsappError ? ` — WhatsApp: ${res.whatsappError}` : " (WhatsApp not configured)"}`);
           }
         },
-        onError: () => toast.error("Failed to start visit"),
+        onError: () => toast.error("Failed to send arrival notice"),
       }
     );
   };
 
-  const handleComplete = (visit: Visit) => {
+  const handleNextHome = (visit: Visit) => {
     completeMutation.mutate(
       { id: visit.id },
       {
         onSuccess: (res) => {
           invalidateList();
           if (res.whatsappSent) {
-            toast.success(`Visit completed. Messages sent.`);
+            toast.success("Group notified of next home. OmSaiRam!");
           } else {
-            toast.warning(`Visit completed${res.whatsappError ? ` — WhatsApp: ${res.whatsappError}` : " (WhatsApp not configured)"}`);
+            toast.warning(`Marked complete${res.whatsappError ? ` — WhatsApp: ${res.whatsappError}` : " (WhatsApp not configured)"}`);
           }
         },
-        onError: () => toast.error("Failed to complete visit"),
+        onError: () => toast.error("Failed to proceed to next home"),
       }
     );
   };
 
-  const handleEnd = (visit: Visit) => {
-    endMutation.mutate(
-      { id: visit.id },
+  const handleThankYou = (lastVisit: Visit) => {
+    endDayMutation.mutate(
+      { id: lastVisit.id },
       {
         onSuccess: (res) => {
           invalidateList();
           if (res.whatsappSent) {
-            toast.success(`Thank you message sent to ${visit.name}`);
+            toast.success("Day complete message sent to the group. Jai Sairam!");
           } else {
-            toast.warning(`Visit ended${res.whatsappError ? ` — WhatsApp: ${res.whatsappError}` : " (WhatsApp not configured)"}`);
+            toast.warning(`Day ended${res.whatsappError ? ` — WhatsApp: ${res.whatsappError}` : " (WhatsApp not configured)"}`);
           }
         },
-        onError: () => toast.error("Failed to end visit"),
-      }
-    );
-  };
-
-  const handleEndDay = (visit: Visit) => {
-    endDayMutation.mutate(
-      { id: visit.id },
-      {
-        onSuccess: () => {
-          invalidateList();
-          toast.success("Sai day completed. OmSaiRam!");
-        },
-        onError: () => toast.error("Failed to end day"),
+        onError: () => toast.error("Failed to complete day"),
       }
     );
   };
@@ -157,16 +139,12 @@ export default function Home() {
 
     const timeout = reminderTime.getTime() - now.getTime();
 
-    if ("Notification" in window) {
-      Notification.requestPermission();
-    }
+    if ("Notification" in window) Notification.requestPermission();
 
     const timer = setTimeout(() => {
       const reminderText = "OmSaiRam - Time to inform the first devotee of the day";
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("Sai Trips Reminder", {
-          body: reminderText,
-        });
+        new Notification("Sai Trips Reminder", { body: reminderText });
       }
       toast(reminderText, { duration: 15000 });
     }, timeout);
@@ -176,28 +154,27 @@ export default function Home() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending": return "bg-gray-100 text-gray-600 border-gray-200";
-      case "started": return "bg-amber-100 text-amber-700 border-amber-200";
+      case "pending":   return "bg-gray-100 text-gray-600 border-gray-200";
+      case "started":   return "bg-amber-100 text-amber-700 border-amber-200";
       case "completed": return "bg-green-100 text-green-700 border-green-200";
-      case "ended": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "ended":     return "bg-blue-100 text-blue-700 border-blue-200";
       case "day_ended": return "bg-purple-100 text-purple-700 border-purple-200";
-      default: return "bg-gray-100 text-gray-600 border-gray-200";
+      default:          return "bg-gray-100 text-gray-600 border-gray-200";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "pending": return "Pending";
-      case "started": return "Active";
+      case "pending":   return "Pending";
+      case "started":   return "Active";
       case "completed": return "Completed";
-      case "ended": return "Ended";
+      case "ended":     return "Ended";
       case "day_ended": return "Day Ended";
-      default: return status;
+      default:          return status;
     }
   };
 
-  const isActionPending = startMutation.isPending || completeMutation.isPending || endMutation.isPending || endDayMutation.isPending;
-  const activeVisit = visitsData?.visits.find(v => v.status === "started");
+  const isActionPending = startMutation.isPending || completeMutation.isPending || endDayMutation.isPending;
 
   const isUnlocked = (visit: Visit, index: number): boolean => {
     if (visit.status !== "pending") return true;
@@ -208,6 +185,14 @@ export default function Home() {
   };
 
   const isDone = (status: string) => ["completed", "ended", "day_ended"].includes(status);
+
+  const visits = visitsData?.visits ?? [];
+  const dayStarted = visits.some(v => v.status !== "pending");
+  const firstVisit = visits[0];
+  const lastVisit = visits[visits.length - 1];
+  const lastIndex = visits.length - 1;
+  const showArrivalNotice = !isLoading && visits.length > 0 && !dayStarted && !visitsData?.isDayComplete;
+  const showThankYou = !isLoading && lastVisit && !isDone(lastVisit.status) && isUnlocked(lastVisit, lastIndex) && !visitsData?.isDayComplete;
 
   return (
     <div className="space-y-6">
@@ -263,11 +248,25 @@ export default function Home() {
         </div>
       )}
 
+      {/* Arrival Notice button — above the schedule */}
+      {showArrivalNotice && (
+        <Button
+          size="lg"
+          className="w-full gap-2 text-base font-semibold shadow-sm"
+          onClick={() => handleArrivalNotice(firstVisit)}
+          disabled={isActionPending}
+          data-testid="button-arrival-notice"
+        >
+          <Bell className="w-5 h-5" />
+          {startMutation.isPending ? "Sending..." : "Send Arrival Notice"}
+        </Button>
+      )}
+
       {/* Visits list */}
       <div className="space-y-4">
         {isLoading ? (
           <div className="py-12 text-center text-muted-foreground">Loading route...</div>
-        ) : !visitsData?.visits || visitsData.visits.length === 0 ? (
+        ) : visits.length === 0 ? (
           <Card className="bg-card border-dashed border-2">
             <CardContent className="py-12 text-center text-muted-foreground flex flex-col items-center">
               <MapPin className="w-12 h-12 mb-4 opacity-20" />
@@ -276,9 +275,10 @@ export default function Home() {
             </CardContent>
           </Card>
         ) : (
-          visitsData.visits.map((visit, index) => {
+          visits.map((visit, index) => {
             const unlocked = isUnlocked(visit, index);
             const done = isDone(visit.status);
+            const isLast = visit.isLast;
 
             return (
               <Card
@@ -305,9 +305,8 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Middle: Contact Info */}
+                    {/* Middle: Address Info */}
                     <div className="p-4 md:p-5 flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold mb-2 truncate">{visit.name}</h3>
                       <div className="space-y-1.5 text-sm text-muted-foreground">
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4 flex-shrink-0" />
@@ -335,8 +334,8 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Right: Action Buttons */}
-                    <div className="p-4 md:p-5 md:w-60 flex-shrink-0 flex flex-col justify-center border-t md:border-t-0 md:border-l border-border bg-muted/10">
+                    {/* Right: Action */}
+                    <div className="p-4 md:p-5 md:w-52 flex-shrink-0 flex flex-col justify-center border-t md:border-t-0 md:border-l border-border bg-muted/10">
                       {done ? (
                         <div className="flex flex-col items-center justify-center text-green-600 py-2">
                           <Check className="w-7 h-7 mb-1" />
@@ -347,73 +346,21 @@ export default function Home() {
                           <Lock className="w-6 h-6 mb-1.5 opacity-40" />
                           <span className="text-xs text-center">Complete previous stops to unlock</span>
                         </div>
-                      ) : (
-                        <div className="space-y-2">
-                          {/* First visit buttons */}
-                          {visit.isFirst && (
-                            <>
-                              {visit.status === "pending" && (
-                                <Button
-                                  data-testid={`button-start-${visit.id}`}
-                                  onClick={() => handleStart(visit)}
-                                  disabled={isActionPending}
-                                  className="w-full text-sm"
-                                  size="sm"
-                                >
-                                  Sai Palki starts
-                                </Button>
-                              )}
-                              <Button
-                                data-testid={`button-complete-${visit.id}`}
-                                variant="secondary"
-                                onClick={() => handleComplete(visit)}
-                                disabled={isActionPending}
-                                className="w-full text-sm"
-                                size="sm"
-                              >
-                                Bikhsa received. Palki continues
-                              </Button>
-                            </>
-                          )}
-
-                          {/* Middle visit buttons */}
-                          {!visit.isFirst && !visit.isLast && (
-                            <Button
-                              data-testid={`button-complete-${visit.id}`}
-                              onClick={() => handleComplete(visit)}
-                              disabled={isActionPending}
-                              className="w-full text-sm"
-                              size="sm"
-                            >
-                              Bikhsa received. Palki continues
-                            </Button>
-                          )}
-
-                          {/* Last visit buttons */}
-                          {visit.isLast && (
-                            <>
-                              <Button
-                                data-testid={`button-end-${visit.id}`}
-                                onClick={() => handleEnd(visit)}
-                                disabled={isActionPending || visit.status === "ended"}
-                                className="w-full text-sm"
-                                size="sm"
-                              >
-                                Sai Palki ends
-                              </Button>
-                              <Button
-                                data-testid={`button-end-day-${visit.id}`}
-                                variant="outline"
-                                onClick={() => handleEndDay(visit)}
-                                disabled={isActionPending || visit.status === "pending"}
-                                className="w-full text-sm text-green-700 border-green-200 hover:bg-green-50"
-                                size="sm"
-                              >
-                                Ending Sai day
-                              </Button>
-                            </>
-                          )}
+                      ) : isLast ? (
+                        <div className="flex flex-col items-center justify-center text-muted-foreground/50 py-2">
+                          <span className="text-xs text-center italic">Use "Thank you" below</span>
                         </div>
+                      ) : (
+                        <Button
+                          data-testid={`button-next-home-${visit.id}`}
+                          onClick={() => handleNextHome(visit)}
+                          disabled={isActionPending}
+                          className="w-full gap-2 text-sm"
+                          size="sm"
+                        >
+                          Next Home
+                          <ArrowRight className="w-4 h-4" />
+                        </Button>
                       )}
                     </div>
 
@@ -426,6 +373,21 @@ export default function Home() {
           })
         )}
       </div>
+
+      {/* Thank you button — below all cards */}
+      {showThankYou && (
+        <Button
+          size="lg"
+          variant="outline"
+          className="w-full gap-2 text-base font-semibold border-primary/30 text-primary hover:bg-primary/5 shadow-sm"
+          onClick={() => handleThankYou(lastVisit)}
+          disabled={isActionPending}
+          data-testid="button-thank-you"
+        >
+          <Heart className="w-5 h-5" />
+          {endDayMutation.isPending ? "Sending..." : "Thank you"}
+        </Button>
+      )}
     </div>
   );
 }
