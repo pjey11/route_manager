@@ -17,7 +17,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { Lock, MapPin, Phone, Clock, Upload, CheckCircle2, Check } from "lucide-react";
-import { GeofenceWatcher } from "@/components/geofence-watcher";
 import { VisitPhotos } from "@/components/visit-photos";
 
 export default function Home() {
@@ -212,8 +211,6 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
-      <GeofenceWatcher activeVisit={activeVisit} />
-      
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
@@ -317,11 +314,7 @@ export default function Home() {
                           <span>{visit.phone}</span>
                         </div>
                         <a
-                          href={
-                            visit.lat && visit.lng
-                              ? `https://www.google.com/maps?q=${visit.lat},${visit.lng}`
-                              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${visit.streetAddress}, ${visit.city}, ${visit.postalCode}`)}`
-                          }
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${visit.streetAddress}, ${visit.city}, ${visit.postalCode}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-start gap-2 group hover:text-primary transition-colors"
