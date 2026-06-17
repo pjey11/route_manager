@@ -25,6 +25,12 @@ const DEFAULT_TEMPLATES = [
     description: "Sent after the last visit or when day is ended — closes out the route for the group",
     content: "OmSaiRam! Palki for the day is completed. Sai Palki will continue its blessed journey tomorrow. Jai Sairam!",
   },
+  {
+    id: 5,
+    name: "Last Home for the Day",
+    description: "Sent when Palki arrives at the final home — announces last Bhoj address to the group",
+    content: "Om Sai Ram! The Palki has arrived at the last home of the day. Baba will have the Bhoj at {address}",
+  },
 ];
 
 const ALLOWED_TEMPLATE_IDS = DEFAULT_TEMPLATES.map((t) => t.id);

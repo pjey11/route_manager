@@ -954,6 +954,90 @@ export const useEndDay = <
 };
 
 /**
+ * @summary Announce arrival at last home of the day — sends template 5 to group
+ */
+export const getLastHomeUrl = (id: number) => {
+  return `/api/visits/${id}/last-home`;
+};
+
+export const lastHome = async (
+  id: number,
+  options?: RequestInit,
+): Promise<VisitActionResponse> => {
+  return customFetch<VisitActionResponse>(getLastHomeUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getLastHomeMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof lastHome>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof lastHome>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["lastHome"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof lastHome>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return lastHome(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LastHomeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof lastHome>>
+>;
+
+export type LastHomeMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Announce arrival at last home of the day — sends template 5 to group
+ */
+export const useLastHome = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof lastHome>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof lastHome>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getLastHomeMutationOptions(options));
+};
+
+/**
  * @summary Log that user is within 500m - returns template 2 message for manual send
  */
 export const getGeofenceAlertUrl = (id: number) => {

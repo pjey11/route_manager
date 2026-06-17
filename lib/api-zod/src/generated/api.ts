@@ -229,6 +229,36 @@ export const EndDayResponse = zod.object({
 });
 
 /**
+ * @summary Announce arrival at last home of the day — sends template 5 to group
+ */
+export const LastHomeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const LastHomeResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+  visit: zod.object({
+    id: zod.number(),
+    date: zod.string(),
+    stopNumber: zod.number(),
+    visitTime: zod.string(),
+    name: zod.string(),
+    phone: zod.string(),
+    streetAddress: zod.string(),
+    city: zod.string(),
+    postalCode: zod.string(),
+    prasadOffering: zod.string(),
+    status: zod.enum(["pending", "started", "completed", "ended", "day_ended"]),
+    isFirst: zod.boolean(),
+    isLast: zod.boolean(),
+    batchId: zod.number(),
+  }),
+  whatsappSent: zod.boolean(),
+  whatsappError: zod.string().optional(),
+});
+
+/**
  * @summary Log that user is within 500m - returns template 2 message for manual send
  */
 export const GeofenceAlertParams = zod.object({
