@@ -7,6 +7,7 @@ import {
   useStartVisit,
   useCompleteVisit,
   useEndDay,
+  useLastHome,
   type Visit,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -33,6 +34,7 @@ export default function Home() {
   const startMutation = useStartVisit();
   const completeMutation = useCompleteVisit();
   const endDayMutation = useEndDay();
+  const lastHomeMutation = useLastHome();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -94,6 +96,23 @@ export default function Home() {
           }
         },
         onError: () => toast.error("Failed to proceed to next home"),
+      }
+    );
+  };
+
+  const handleLastHome = (visit: Visit) => {
+    lastHomeMutation.mutate(
+      { id: visit.id },
+      {
+        onSuccess: (res) => {
+          invalidateList();
+          if (res.whatsappSent) {
+            toast.success("Last home announced to the group. OmSaiRam!");
+          } else {
+            toast.warning(`Announced${res.whatsappError ? ` — WhatsApp: ${res.whatsappError}` : " (WhatsApp not configured)"}`);
+          }
+        },
+        onError: () => toast.error("Failed to announce last home"),
       }
     );
   };
@@ -174,7 +193,7 @@ export default function Home() {
     }
   };
 
-  const isActionPending = startMutation.isPending || completeMutation.isPending || endDayMutation.isPending;
+  const isActionPending = startMutation.isPending || completeMutation.isPending || endDayMutation.isPending || lastHomeMutation.isPending;
 
   const isUnlocked = (visit: Visit, index: number): boolean => {
     if (visit.status !== "pending") return true;
@@ -347,9 +366,16 @@ export default function Home() {
                           <span className="text-xs text-center">Complete previous stops to unlock</span>
                         </div>
                       ) : isLast ? (
-                        <div className="flex flex-col items-center justify-center text-muted-foreground/50 py-2">
-                          <span className="text-xs text-center italic">Use "Thank you" below</span>
-                        </div>
+                        <Button
+                          data-testid={`button-last-home-${visit.id}`}
+                          variant="secondary"
+                          onClick={() => handleLastHome(visit)}
+                          disabled={isActionPending}
+                          className="w-full gap-2 text-sm"
+                          size="sm"
+                        >
+                          🏠 Last home for the day
+                        </Button>
                       ) : (
                         <Button
                           data-testid={`button-next-home-${visit.id}`}

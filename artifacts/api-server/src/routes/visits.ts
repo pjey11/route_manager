@@ -9,6 +9,7 @@ import {
   CompleteVisitParams,
   EndVisitParams,
   EndDayParams,
+  LastHomeParams,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/requireAuth";
 import { sendGroupMessage } from "../lib/whatsapp";
@@ -396,6 +397,40 @@ router.post("/visits/:id/end", requireAuth, async (req, res): Promise<void> => {
     success: true,
     message: "Visit ended",
     visit: buildVisitResponse(updated, idx === 0, isLast),
+    whatsappSent: waResult.success,
+    whatsappError: waResult.error,
+  });
+});
+
+router.post("/visits/:id/last-home", requireAuth, async (req, res): Promise<void> => {
+  const parsed = LastHomeParams.safeParse(req.params);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid visit ID" });
+    return;
+  }
+  const id = parsed.data.id;
+
+  const [visit] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
+  if (!visit) {
+    res.status(404).json({ error: "Visit not found" });
+    return;
+  }
+
+  const allVisits = await db
+    .select()
+    .from(visitsTable)
+    .where(eq(visitsTable.date, visit.date))
+    .orderBy(asc(visitsTable.stopNumber));
+  const idx = allVisits.findIndex((v) => v.id === id);
+
+  const templateContent = await getTemplate(5);
+  const message = applyTemplate(templateContent, visit);
+  const waResult = await sendGroupMessage(message);
+
+  res.json({
+    success: true,
+    message: "Last home announced",
+    visit: buildVisitResponse(visit, idx === 0, idx === allVisits.length - 1),
     whatsappSent: waResult.success,
     whatsappError: waResult.error,
   });
