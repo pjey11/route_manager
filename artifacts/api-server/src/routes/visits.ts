@@ -50,10 +50,16 @@ async function getTemplate(id: number): Promise<string> {
   return tmpl?.content || "";
 }
 
-type VisitFields = { streetAddress: string; city: string; postalCode: string; prasadOffering: string };
+type VisitFields = { streetAddress: string; city: string; postalCode: string; prasadOffering: string; visitTime: string };
 
 function formatAddress(v: VisitFields): string {
   return `${v.streetAddress}, ${v.city} ${v.postalCode}`;
+}
+
+function buildRoster(visits: VisitFields[]): string {
+  return visits
+    .map((v) => `${formatAddress(v)}\n${v.visitTime}\nPrasad: ${v.prasadOffering}`)
+    .join("\n\n");
 }
 
 function applyTemplate(content: string, visit: VisitFields, nextVisit?: VisitFields): string {
@@ -302,7 +308,9 @@ router.post("/visits/:id/start", requireAuth, async (req, res): Promise<void> =>
   const idx = allVisits.findIndex((v) => v.id === id);
 
   const templateContent = await getTemplate(1);
-  const message = applyTemplate(templateContent, visit);
+  const baseMessage = applyTemplate(templateContent, visit);
+  const roster = buildRoster(allVisits);
+  const message = `${baseMessage}\n\n${roster}`;
   const waResult = await sendGroupMessage(message);
 
   res.json({
