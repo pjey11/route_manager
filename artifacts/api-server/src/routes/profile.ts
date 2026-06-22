@@ -1,11 +1,11 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, profileTable } from "@workspace/db";
-import { requireAuth } from "../middlewares/requireAuth";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
-router.get("/profile", requireAuth, async (_req, res): Promise<void> => {
+router.get("/profile", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db.select().from(profileTable).where(eq(profileTable.id, 1)).limit(1);
 
   if (rows.length === 0) {
@@ -17,7 +17,7 @@ router.get("/profile", requireAuth, async (_req, res): Promise<void> => {
   res.json({ id: p.id, name: p.name, phone: p.phone, updatedAt: p.updatedAt.toISOString() });
 });
 
-router.put("/profile", requireAuth, async (req, res): Promise<void> => {
+router.put("/profile", requireAdmin, async (req, res): Promise<void> => {
   const { name, phone } = req.body as { name?: string; phone?: string };
 
   if (typeof name !== "string" || name.trim() === "") {

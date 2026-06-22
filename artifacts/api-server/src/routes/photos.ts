@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, and, count } from "drizzle-orm";
 import { db, visitPhotosTable, aiSettingsTable } from "@workspace/db";
-import { requireAuth } from "../middlewares/requireAuth";
+import { requireAdmin } from "../middlewares/requireAdmin";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 
 const router: IRouter = Router();
@@ -9,7 +9,7 @@ const objectStorageService = new ObjectStorageService();
 
 const MAX_PHOTOS = 3;
 
-router.get("/visits/:id/photos", requireAuth, async (req, res): Promise<void> => {
+router.get("/visits/:id/photos", requireAdmin, async (req, res): Promise<void> => {
   const visitId = parseInt(String(req.params["id"] ?? "0"));
   if (!visitId) { res.status(400).json({ error: "Invalid visit id" }); return; }
 
@@ -29,7 +29,7 @@ router.get("/visits/:id/photos", requireAuth, async (req, res): Promise<void> =>
   });
 });
 
-router.post("/visits/:id/photos", requireAuth, async (req, res): Promise<void> => {
+router.post("/visits/:id/photos", requireAdmin, async (req, res): Promise<void> => {
   const visitId = parseInt(String(req.params["id"] ?? "0"));
   if (!visitId) { res.status(400).json({ error: "Invalid visit id" }); return; }
 
@@ -63,7 +63,7 @@ router.post("/visits/:id/photos", requireAuth, async (req, res): Promise<void> =
   });
 });
 
-router.delete("/visits/:id/photos/:photoId", requireAuth, async (req, res): Promise<void> => {
+router.delete("/visits/:id/photos/:photoId", requireAdmin, async (req, res): Promise<void> => {
   const visitId = parseInt(String(req.params["id"] ?? "0"));
   const photoId = parseInt(String(req.params["photoId"] ?? "0"));
   if (!visitId || !photoId) { res.status(400).json({ error: "Invalid id" }); return; }
@@ -74,7 +74,7 @@ router.delete("/visits/:id/photos/:photoId", requireAuth, async (req, res): Prom
   res.json({ success: true, message: "Photo deleted" });
 });
 
-router.post("/visits/:id/photos/:photoId/analyze", requireAuth, async (req, res): Promise<void> => {
+router.post("/visits/:id/photos/:photoId/analyze", requireAdmin, async (req, res): Promise<void> => {
   const visitId = parseInt(String(req.params["id"] ?? "0"));
   const photoId = parseInt(String(req.params["photoId"] ?? "0"));
   if (!visitId || !photoId) { res.status(400).json({ error: "Invalid id" }); return; }

@@ -14,6 +14,7 @@ import {
   VolunteerCompleteBody,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/requireAuth";
+import { requireAdmin } from "../middlewares/requireAdmin";
 import { sendGroupMessage } from "../lib/whatsapp";
 import { geocodeAddress } from "../lib/geocode";
 
@@ -121,7 +122,7 @@ router.get("/visits", requireAuth, async (req, res): Promise<void> => {
   });
 });
 
-router.post("/visits/upload", requireAuth, upload.single("file"), async (req, res): Promise<void> => {
+router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, res): Promise<void> => {
   if (!req.file) {
     res.status(400).json({ error: "No file uploaded" });
     return;
@@ -285,7 +286,7 @@ router.post("/visits/upload", requireAuth, upload.single("file"), async (req, re
   }
 });
 
-router.post("/visits/:id/start", requireAuth, async (req, res): Promise<void> => {
+router.post("/visits/:id/start", requireAdmin, async (req, res): Promise<void> => {
   const parsed = StartVisitParams.safeParse(req.params);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid visit ID" });
@@ -324,7 +325,7 @@ router.post("/visits/:id/start", requireAuth, async (req, res): Promise<void> =>
   });
 });
 
-router.post("/visits/:id/complete", requireAuth, async (req, res): Promise<void> => {
+router.post("/visits/:id/complete", requireAdmin, async (req, res): Promise<void> => {
   const parsed = CompleteVisitParams.safeParse(req.params);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid visit ID" });
@@ -368,7 +369,7 @@ router.post("/visits/:id/complete", requireAuth, async (req, res): Promise<void>
   });
 });
 
-router.post("/visits/:id/end", requireAuth, async (req, res): Promise<void> => {
+router.post("/visits/:id/end", requireAdmin, async (req, res): Promise<void> => {
   const parsed = EndVisitParams.safeParse(req.params);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid visit ID" });
@@ -457,7 +458,7 @@ router.post("/visits/:id/volunteer-complete", requireAuth, async (req, res): Pro
   });
 });
 
-router.post("/visits/:id/last-home", requireAuth, async (req, res): Promise<void> => {
+router.post("/visits/:id/last-home", requireAdmin, async (req, res): Promise<void> => {
   const parsed = LastHomeParams.safeParse(req.params);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid visit ID" });
@@ -491,7 +492,7 @@ router.post("/visits/:id/last-home", requireAuth, async (req, res): Promise<void
   });
 });
 
-router.post("/visits/:id/end-day", requireAuth, async (req, res): Promise<void> => {
+router.post("/visits/:id/end-day", requireAdmin, async (req, res): Promise<void> => {
   const parsed = EndDayParams.safeParse(req.params);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid visit ID" });

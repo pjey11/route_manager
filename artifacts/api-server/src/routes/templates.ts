@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, notInArray } from "drizzle-orm";
 import { db, notificationTemplatesTable } from "@workspace/db";
 import { UpdateTemplateParams, UpdateTemplateBody } from "@workspace/api-zod";
-import { requireAuth } from "../middlewares/requireAuth";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
@@ -56,7 +56,7 @@ async function ensureTemplatesExist() {
   }
 }
 
-router.get("/templates", requireAuth, async (req, res): Promise<void> => {
+router.get("/templates", requireAdmin, async (req, res): Promise<void> => {
   await ensureTemplatesExist();
 
   const templates = await db
@@ -75,7 +75,7 @@ router.get("/templates", requireAuth, async (req, res): Promise<void> => {
   });
 });
 
-router.put("/templates/:id", requireAuth, async (req, res): Promise<void> => {
+router.put("/templates/:id", requireAdmin, async (req, res): Promise<void> => {
   const params = UpdateTemplateParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: "Invalid template ID" });
