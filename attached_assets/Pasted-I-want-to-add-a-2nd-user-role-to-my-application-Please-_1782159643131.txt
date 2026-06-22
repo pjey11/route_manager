@@ -1,0 +1,62 @@
+I want to add a 2nd user role to my application. Please implement this new role, its permissions, and the corresponding UI views based on the specifications below.
+
+### 1. High-Level Overview
+We are introducing a new secondary role to the application (e.g., "Field Technician" / "Service Provider"). This role has highly restricted access and is only permitted to perform exactly two actions:
+1. Complete a scheduled trip at a home.
+2. Add specific data/notes to that trip upon completion.
+
+---
+
+### 2. Role & Access Control (Backend/Logic)
+- **New Role Name:** [Volunteer]
+- **Permissions:** 
+  - This role should NOT have access to the main admin dashboard, settings, or billing.
+  - If they attempt to access restricted routes, redirect them to their specific dashboard.
+  - Authenticated sessions for this role should only fetch data relevant to their assigned tasks.
+  - The role will see the day's list alone upon logging in.
+  - The username should be seva@twadmin.com
+
+---
+
+### 3. Database Updates
+Please update the schema (and update migrations/models if using an ORM like Drizzle/Prisma) to support this:
+- **User/Role Table:** Add or update the role field to support the new role.
+- **Trip/Data Table:** Ensure the trip or appointment model can store the new data points:
+  - [Data Point 1, e.g., text notes]
+  - [Data Point 2, e.g., a numeric value, photo URL, or status timestamp]
+  - A timestamp for the confirmed trip completion time (`completed_at`).
+
+---
+
+### 4. UI & Frontend Changes (The 2 Allowed Actions)
+When a user with this 2nd role logs in, they should see a simplified, mobile-friendly dashboard containing:
+
+#### Action 1: Complete a Trip
+- Display a list of [Today's Trips / Assigned Trips].
+- Provide a prominent "Complete Trip" button for the active trip.
+
+#### Action 2: Add Data & Completion Confirmation (with Time Edit)
+- When the user inputs the required data and clicks "Complete Trip", display a confirmation modal/dialogue before finalizing.
+- **The Confirmation Text:** 
+  "The Palki has completed the stop at {address} at {hh:mm}. Confirm."
+  - `{address}` is the current stop's address.
+  - `{hh:mm}` defaults to the current local time of the device.
+
+- **Manual Time Override:**
+  - In the confirmation modal, provide an "Edit Time" option or an inline time-picker.
+  - If the user missed completing the trip at the exact moment it happened, allow them to manually adjust the `{hh:mm}` timestamp.
+  - If they edit the time, dynamically update the text string in the modal to reflect the newly adjusted time.
+
+- **Manual Affirmation ("Yes" Check):**
+  - To prevent accidental completions, require an explicit manual affirmation. Provide an input field where the user must type the word "Yes" (case-insensitive) OR a distinct, clear button that confirms the statement.
+
+- **Submission:**
+  - Clicking final confirmation saves the final confirmed/edited time and the added data to the database, then marks the trip as complete. Include a "Cancel" button to close the modal without saving.
+
+---
+
+### 5. Expected Output
+Please update the necessary server routes/API endpoints, frontend components, and database models. Ensure existing admin/primary user functionalities remain completely unaffected by these changes.
+No notification templates are required for Complete trip.
+The complete trip button should not be visible for saiadmin@twadmin.com user
+
