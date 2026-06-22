@@ -5,11 +5,14 @@ declare module "express-session" {
   interface SessionData {
     authenticated: boolean;
     email: string;
+    role: "admin" | "volunteer";
   }
 }
 
-const ADMIN_EMAIL = "saiadmin@twadmin.com";
-const ADMIN_PASSWORD = "5A18A8A";
+const USERS: { email: string; password: string; role: "admin" | "volunteer" }[] = [
+  { email: "saiadmin@twadmin.com", password: "5A18A8A", role: "admin" },
+  { email: "seva@twadmin.com", password: "SEVA2024", role: "volunteer" },
+];
 
 const router: IRouter = Router();
 
@@ -21,16 +24,18 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   }
 
   const { email, password } = parsed.data;
+  const user = USERS.find((u) => u.email === email && u.password === password);
 
-  if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+  if (!user) {
     res.status(401).json({ error: "Invalid credentials" });
     return;
   }
 
   req.session.authenticated = true;
-  req.session.email = email;
+  req.session.email = user.email;
+  req.session.role = user.role;
 
-  res.json({ email, isAuthenticated: true });
+  res.json({ email: user.email, isAuthenticated: true, role: user.role });
 });
 
 router.post("/auth/logout", async (req, res): Promise<void> => {
@@ -44,7 +49,7 @@ router.get("/auth/me", async (req, res): Promise<void> => {
     res.status(401).json({ error: "Not authenticated", isAuthenticated: false });
     return;
   }
-  res.json({ email: req.session.email, isAuthenticated: true });
+  res.json({ email: req.session.email, isAuthenticated: true, role: req.session.role ?? "admin" });
 });
 
 export function requireAuth(req: Parameters<typeof router.use>[0] extends (...args: infer A) => unknown ? A[0] : never, res: Parameters<typeof router.use>[0] extends (...args: infer A) => unknown ? A[1] : never, next: Parameters<typeof router.use>[0] extends (...args: infer A) => unknown ? A[2] : never): void {

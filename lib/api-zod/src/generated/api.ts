@@ -25,6 +25,7 @@ export const LoginBody = zod.object({
 export const LoginResponse = zod.object({
   email: zod.string(),
   isAuthenticated: zod.boolean(),
+  role: zod.enum(["admin", "volunteer"]),
 });
 
 /**
@@ -41,6 +42,7 @@ export const LogoutResponse = zod.object({
 export const GetMeResponse = zod.object({
   email: zod.string(),
   isAuthenticated: zod.boolean(),
+  role: zod.enum(["admin", "volunteer"]),
 });
 
 /**
@@ -206,6 +208,44 @@ export const EndDayParams = zod.object({
 });
 
 export const EndDayResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+  visit: zod.object({
+    id: zod.number(),
+    date: zod.string(),
+    stopNumber: zod.number(),
+    visitTime: zod.string(),
+    name: zod.string(),
+    phone: zod.string(),
+    streetAddress: zod.string(),
+    city: zod.string(),
+    postalCode: zod.string(),
+    prasadOffering: zod.string(),
+    status: zod.enum(["pending", "started", "completed", "ended", "day_ended"]),
+    isFirst: zod.boolean(),
+    isLast: zod.boolean(),
+    batchId: zod.number(),
+  }),
+  whatsappSent: zod.boolean(),
+  whatsappError: zod.string().optional(),
+});
+
+/**
+ * @summary Volunteer marks a stop complete with a confirmed timestamp (no WhatsApp sent)
+ */
+export const VolunteerCompleteParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const VolunteerCompleteBody = zod.object({
+  completedAt: zod
+    .string()
+    .describe("ISO-8601 timestamp of when the stop was completed"),
+  notes: zod.string().optional(),
+  timeEdited: zod.boolean().optional(),
+});
+
+export const VolunteerCompleteResponse = zod.object({
   success: zod.boolean(),
   message: zod.string().optional(),
   visit: zod.object({

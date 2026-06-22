@@ -11,6 +11,7 @@ import Notifications from "@/pages/notifications";
 import Instructions from "@/pages/instructions";
 import Profile from "@/pages/profile";
 import Reports from "@/pages/reports";
+import Volunteer from "@/pages/volunteer";
 import { Layout } from "@/components/layout";
 
 const queryClient = new QueryClient({
@@ -28,13 +29,18 @@ const queryClient = new QueryClient({
   },
 });
 
-function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+function AdminRoute({ component: Component }: { component: React.ComponentType }) {
   const { data: user, isLoading, isError } = useGetMe();
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (!isLoading && (isError || !user?.isAuthenticated)) {
+    if (isLoading) return;
+    if (isError || !user?.isAuthenticated) {
       setLocation("/login");
+      return;
+    }
+    if (user.role === "volunteer") {
+      setLocation("/volunteer");
     }
   }, [isLoading, isError, user, setLocation]);
 
@@ -46,7 +52,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
     );
   }
 
-  if (isError || !user?.isAuthenticated) {
+  if (isError || !user?.isAuthenticated || user.role === "volunteer") {
     return null;
   }
 
@@ -57,24 +63,57 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   );
 }
 
+function VolunteerRoute({ component: Component }: { component: React.ComponentType }) {
+  const { data: user, isLoading, isError } = useGetMe();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (isError || !user?.isAuthenticated) {
+      setLocation("/login");
+      return;
+    }
+    if (user.role === "admin") {
+      setLocation("/");
+    }
+  }, [isLoading, isError, user, setLocation]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground text-sm">Loading...</p>
+      </div>
+    );
+  }
+
+  if (isError || !user?.isAuthenticated || user.role === "admin") {
+    return null;
+  }
+
+  return <Component />;
+}
+
 function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/volunteer">
+        <VolunteerRoute component={Volunteer} />
+      </Route>
       <Route path="/">
-        <ProtectedRoute component={Home} />
+        <AdminRoute component={Home} />
       </Route>
       <Route path="/notifications">
-        <ProtectedRoute component={Notifications} />
+        <AdminRoute component={Notifications} />
       </Route>
       <Route path="/instructions">
-        <ProtectedRoute component={Instructions} />
+        <AdminRoute component={Instructions} />
       </Route>
       <Route path="/profile">
-        <ProtectedRoute component={Profile} />
+        <AdminRoute component={Profile} />
       </Route>
       <Route path="/reports">
-        <ProtectedRoute component={Reports} />
+        <AdminRoute component={Reports} />
       </Route>
       <Route component={NotFound} />
     </Switch>
