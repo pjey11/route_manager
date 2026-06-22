@@ -1,11 +1,11 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, aiSettingsTable } from "@workspace/db";
-import { requireAuth } from "../middlewares/requireAuth";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
-router.get("/ai-settings", requireAuth, async (_req, res): Promise<void> => {
+router.get("/ai-settings", requireAdmin, async (_req, res): Promise<void> => {
   const rows = await db.select().from(aiSettingsTable).where(eq(aiSettingsTable.id, 1)).limit(1);
 
   if (rows.length === 0) {
@@ -22,7 +22,7 @@ router.get("/ai-settings", requireAuth, async (_req, res): Promise<void> => {
   res.json({ id: s.id, provider: s.provider, modelId: s.modelId, updatedAt: s.updatedAt.toISOString() });
 });
 
-router.put("/ai-settings", requireAuth, async (req, res): Promise<void> => {
+router.put("/ai-settings", requireAdmin, async (req, res): Promise<void> => {
   const { provider, modelId } = req.body as { provider?: string; modelId?: string };
 
   if (typeof provider !== "string" || provider.trim() === "") {

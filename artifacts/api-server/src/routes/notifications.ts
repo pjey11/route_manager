@@ -2,12 +2,12 @@ import { Router, type IRouter } from "express";
 import { eq, asc } from "drizzle-orm";
 import { db, visitsTable } from "@workspace/db";
 import { SendBulkNotificationBody } from "@workspace/api-zod";
-import { requireAuth } from "../middlewares/requireAuth";
+import { requireAdmin } from "../middlewares/requireAdmin";
 import { sendGroupMessage } from "../lib/whatsapp";
 
 const router: IRouter = Router();
 
-router.post("/notifications/bulk", requireAuth, async (req, res): Promise<void> => {
+router.post("/notifications/bulk", requireAdmin, async (req, res): Promise<void> => {
   const parsed = SendBulkNotificationBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request body. Please provide a valid date." });

@@ -4,6 +4,7 @@ declare module "express-session" {
   interface SessionData {
     authenticated: boolean;
     email: string;
+    role: "admin" | "volunteer";
   }
 }
 
