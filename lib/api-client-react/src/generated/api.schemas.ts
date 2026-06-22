@@ -24,9 +24,24 @@ export interface LoginBody {
   password: string;
 }
 
+export type AuthUserRole = (typeof AuthUserRole)[keyof typeof AuthUserRole];
+
+export const AuthUserRole = {
+  admin: "admin",
+  volunteer: "volunteer",
+} as const;
+
 export interface AuthUser {
   email: string;
   isAuthenticated: boolean;
+  role: AuthUserRole;
+}
+
+export interface VolunteerCompleteBody {
+  /** ISO-8601 timestamp of when the stop was completed */
+  completedAt: string;
+  notes?: string;
+  timeEdited?: boolean;
 }
 
 export type VisitStatus = (typeof VisitStatus)[keyof typeof VisitStatus];

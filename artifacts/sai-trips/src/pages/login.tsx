@@ -35,8 +35,8 @@ export default function Login() {
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
     loginMutation.mutate({ data: values }, {
-      onSuccess: () => {
-        setLocation("/");
+      onSuccess: (res) => {
+        setLocation(res.role === "volunteer" ? "/volunteer" : "/");
       },
       onError: (err) => {
         const msg = (err as { data?: { error?: string } })?.data?.error || "Invalid email or password";

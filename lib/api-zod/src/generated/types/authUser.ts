@@ -5,8 +5,10 @@
  * Sai Trips API
  * OpenAPI spec version: 0.1.0
  */
+import type { AuthUserRole } from "./authUserRole";
 
 export interface AuthUser {
   email: string;
   isAuthenticated: boolean;
+  role: AuthUserRole;
 }

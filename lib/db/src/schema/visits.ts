@@ -26,6 +26,9 @@ export const visitsTable = pgTable("visits", {
   lat: real("lat"),
   lng: real("lng"),
   status: text("status").notNull().default("pending"),
+  completedAt: timestamp("completed_at"),
+  completionNotes: text("completion_notes"),
+  completionTimeEdited: boolean("completion_time_edited"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

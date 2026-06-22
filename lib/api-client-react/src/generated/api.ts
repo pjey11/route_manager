@@ -44,6 +44,7 @@ import type {
   VisitPhoto,
   VisitPhotosResponse,
   VisitsResponse,
+  VolunteerCompleteBody,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -951,6 +952,93 @@ export const useEndDay = <
   TContext
 > => {
   return useMutation(getEndDayMutationOptions(options));
+};
+
+/**
+ * @summary Volunteer marks a stop complete with a confirmed timestamp (no WhatsApp sent)
+ */
+export const getVolunteerCompleteUrl = (id: number) => {
+  return `/api/visits/${id}/volunteer-complete`;
+};
+
+export const volunteerComplete = async (
+  id: number,
+  volunteerCompleteBody: VolunteerCompleteBody,
+  options?: RequestInit,
+): Promise<VisitActionResponse> => {
+  return customFetch<VisitActionResponse>(getVolunteerCompleteUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(volunteerCompleteBody),
+  });
+};
+
+export const getVolunteerCompleteMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof volunteerComplete>>,
+    TError,
+    { id: number; data: BodyType<VolunteerCompleteBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof volunteerComplete>>,
+  TError,
+  { id: number; data: BodyType<VolunteerCompleteBody> },
+  TContext
+> => {
+  const mutationKey = ["volunteerComplete"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof volunteerComplete>>,
+    { id: number; data: BodyType<VolunteerCompleteBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return volunteerComplete(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type VolunteerCompleteMutationResult = NonNullable<
+  Awaited<ReturnType<typeof volunteerComplete>>
+>;
+export type VolunteerCompleteMutationBody = BodyType<VolunteerCompleteBody>;
+export type VolunteerCompleteMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Volunteer marks a stop complete with a confirmed timestamp (no WhatsApp sent)
+ */
+export const useVolunteerComplete = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof volunteerComplete>>,
+    TError,
+    { id: number; data: BodyType<VolunteerCompleteBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof volunteerComplete>>,
+  TError,
+  { id: number; data: BodyType<VolunteerCompleteBody> },
+  TContext
+> => {
+  return useMutation(getVolunteerCompleteMutationOptions(options));
 };
 
 /**

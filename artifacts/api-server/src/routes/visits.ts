@@ -10,6 +10,8 @@ import {
   EndVisitParams,
   EndDayParams,
   LastHomeParams,
+  VolunteerCompleteParams,
+  VolunteerCompleteBody,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/requireAuth";
 import { sendGroupMessage } from "../lib/whatsapp";
@@ -407,6 +409,51 @@ router.post("/visits/:id/end", requireAuth, async (req, res): Promise<void> => {
     visit: buildVisitResponse(updated, idx === 0, isLast),
     whatsappSent: waResult.success,
     whatsappError: waResult.error,
+  });
+});
+
+router.post("/visits/:id/volunteer-complete", requireAuth, async (req, res): Promise<void> => {
+  const parsedParams = VolunteerCompleteParams.safeParse(req.params);
+  if (!parsedParams.success) {
+    res.status(400).json({ error: "Invalid visit ID" });
+    return;
+  }
+  const id = parsedParams.data.id;
+
+  const parsedBody = VolunteerCompleteBody.safeParse(req.body);
+  if (!parsedBody.success) {
+    res.status(400).json({ error: "Invalid request body" });
+    return;
+  }
+  const { completedAt, notes, timeEdited } = parsedBody.data;
+
+  const [visit] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
+  if (!visit) {
+    res.status(404).json({ error: "Visit not found" });
+    return;
+  }
+
+  await db.update(visitsTable).set({
+    status: "completed",
+    completedAt: new Date(completedAt),
+    completionNotes: notes ?? null,
+    completionTimeEdited: timeEdited ?? false,
+  }).where(eq(visitsTable.id, id));
+
+  const [updated] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
+
+  const allVisits = await db
+    .select()
+    .from(visitsTable)
+    .where(eq(visitsTable.date, visit.date))
+    .orderBy(asc(visitsTable.stopNumber));
+  const idx = allVisits.findIndex((v) => v.id === id);
+
+  res.json({
+    success: true,
+    message: "Stop marked complete",
+    visit: buildVisitResponse(updated, idx === 0, idx === allVisits.length - 1),
+    whatsappSent: false,
   });
 });
 
