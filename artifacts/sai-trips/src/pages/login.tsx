@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useLogin } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -16,25 +17,46 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+const STORAGE_KEY = "sai_trips_remember";
+
+function getSavedCredentials() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as { email: string; password: string };
+  } catch {
+    return null;
+  }
+}
+
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().default(false),
 });
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const loginMutation = useLogin();
+  const saved = getSavedCredentials();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "saiadmin@twadmin.com",
-      password: "5A18A8A",
+      email: saved?.email ?? "",
+      password: saved?.password ?? "",
+      rememberMe: !!saved,
     },
   });
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
-    loginMutation.mutate({ data: values }, {
+    if (values.rememberMe) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ email: values.email, password: values.password }));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    loginMutation.mutate({ data: { email: values.email, password: values.password } }, {
       onSuccess: (res) => {
         setLocation(res.role === "volunteer" ? "/volunteer" : "/");
       },
@@ -47,7 +69,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
-      {/* Decorative background elements */}
       <div className="absolute top-0 left-0 w-full h-64 bg-primary/10 rounded-b-[100px] -translate-y-32"></div>
       
       <Card className="w-full max-w-md relative z-10 border-primary/20 shadow-xl shadow-primary/5">
@@ -86,6 +107,23 @@ export default function Login() {
                       <Input type="password" placeholder="••••••••" {...field} className="bg-background" />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="rememberMe"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-2 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm font-normal cursor-pointer select-none">
+                      Remember me
+                    </FormLabel>
                   </FormItem>
                 )}
               />
