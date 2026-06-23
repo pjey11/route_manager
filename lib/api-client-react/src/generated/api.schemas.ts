@@ -126,6 +126,8 @@ export interface TemplatesResponse {
 
 export interface UpdateTemplateBody {
   content: string;
+  name?: string;
+  description?: string;
 }
 
 export interface UpdateVisitTimeBody {

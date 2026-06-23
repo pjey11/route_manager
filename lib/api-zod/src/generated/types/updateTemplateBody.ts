@@ -8,4 +8,6 @@
 
 export interface UpdateTemplateBody {
   content: string;
+  name?: string;
+  description?: string;
 }

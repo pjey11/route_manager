@@ -523,6 +523,8 @@ export const UpdateTemplateParams = zod.object({
 
 export const UpdateTemplateBody = zod.object({
   content: zod.string(),
+  name: zod.string().optional(),
+  description: zod.string().optional(),
 });
 
 export const UpdateTemplateResponse = zod.object({
