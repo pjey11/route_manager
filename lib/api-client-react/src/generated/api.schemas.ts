@@ -128,6 +128,17 @@ export interface UpdateTemplateBody {
   content: string;
 }
 
+export interface UpdateVisitTimeBody {
+  /** New visit time in HH:MM format */
+  visitTime: string;
+}
+
+export interface UpdateVisitTimeResponse {
+  success: boolean;
+  message: string;
+  updatedCount: number;
+}
+
 export interface BulkNotificationBody {
   /** Date in YYYY-MM-DD format */
   date: string;

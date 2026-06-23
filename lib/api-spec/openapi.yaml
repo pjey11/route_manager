@@ -306,6 +306,43 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /visits/{id}/time:
+    patch:
+      operationId: updateVisitTime
+      tags: [visits]
+      summary: Update visit time and cascade the diff to all subsequent pending/started stops
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateVisitTimeBody"
+      responses:
+        "200":
+          description: Visit times updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateVisitTimeResponse"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Visit already completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /visits/{id}/geofence-alert:
     post:
       operationId: geofenceAlert
@@ -842,6 +879,29 @@ components:
           type: string
       required:
         - content
+
+    UpdateVisitTimeBody:
+      type: object
+      properties:
+        visitTime:
+          type: string
+          description: New visit time in HH:MM format
+      required:
+        - visitTime
+
+    UpdateVisitTimeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        updatedCount:
+          type: integer
+      required:
+        - success
+        - message
+        - updatedCount
 
     BulkNotificationBody:
       type: object

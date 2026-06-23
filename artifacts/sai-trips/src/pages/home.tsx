@@ -8,21 +8,27 @@ import {
   useCompleteVisit,
   useEndDay,
   useLastHome,
+  useUpdateVisitTime,
   type Visit,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
-import { Lock, MapPin, Phone, Clock, Upload, CheckCircle2, Check, Bell, ArrowRight, Heart, ExternalLink } from "lucide-react";
+import { Lock, MapPin, Phone, Clock, Upload, CheckCircle2, Check, Bell, ArrowRight, Heart, ExternalLink, Pencil } from "lucide-react";
 import { VisitPhotos } from "@/components/visit-photos";
 
 export default function Home() {
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
   const [uploading, setUploading] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingTime, setEditingTime] = useState("");
+  const [confirmEdit, setConfirmEdit] = useState<{ id: number; newTime: string } | null>(null);
 
   const { data: datesData } = useListVisitDates();
   const { data: visitsData, isLoading } = useListVisits(
@@ -35,6 +41,7 @@ export default function Home() {
   const completeMutation = useCompleteVisit();
   const endDayMutation = useEndDay();
   const lastHomeMutation = useLastHome();
+  const updateTimeMutation = useUpdateVisitTime();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -113,6 +120,25 @@ export default function Home() {
           }
         },
         onError: () => toast.error("Failed to announce last home"),
+      }
+    );
+  };
+
+  const handleConfirmTimeUpdate = () => {
+    if (!confirmEdit) return;
+    updateTimeMutation.mutate(
+      { id: confirmEdit.id, data: { visitTime: confirmEdit.newTime } },
+      {
+        onSuccess: (res) => {
+          invalidateList();
+          setConfirmEdit(null);
+          setEditingId(null);
+          toast.success(res.message ?? "Visit times updated");
+        },
+        onError: () => {
+          setConfirmEdit(null);
+          toast.error("Failed to update visit time");
+        },
       }
     );
   };
@@ -314,10 +340,49 @@ export default function Home() {
                         <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary font-bold text-sm flex-shrink-0">
                           {visit.stopNumber}
                         </span>
-                        <span className="flex items-center gap-1.5 font-medium text-base">
-                          <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          {visit.visitTime}
-                        </span>
+                        {!done && editingId === visit.id ? (
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="time"
+                              value={editingTime}
+                              onChange={e => setEditingTime(e.target.value)}
+                              className="h-7 w-28 text-sm px-1"
+                              autoFocus
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 px-2 text-xs text-green-700"
+                              onClick={() => {
+                                if (editingTime) setConfirmEdit({ id: visit.id, newTime: editingTime });
+                              }}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 px-2 text-xs"
+                              onClick={() => setEditingId(null)}
+                            >
+                              ✕
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="flex items-center gap-1.5 font-medium text-base">
+                            <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            {visit.visitTime}
+                            {!done && (
+                              <button
+                                onClick={() => { setEditingId(visit.id); setEditingTime(visit.visitTime); }}
+                                className="ml-0.5 text-muted-foreground/50 hover:text-primary transition-colors"
+                                title="Edit arrival time"
+                              >
+                                <Pencil className="w-3 h-3" />
+                              </button>
+                            )}
+                          </span>
+                        )}
                       </div>
                       <div className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(visit.status)}`}>
                         {getStatusLabel(visit.status)}
@@ -422,6 +487,25 @@ export default function Home() {
       </div>
 
       {/* Thank you button — below all cards */}
+      <Dialog open={!!confirmEdit} onOpenChange={open => { if (!open) setConfirmEdit(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Update Arrival Times</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            The arrival time for this address and the rest of the addresses will be adjusted.
+          </p>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setConfirmEdit(null)} disabled={updateTimeMutation.isPending}>
+              No
+            </Button>
+            <Button onClick={handleConfirmTimeUpdate} disabled={updateTimeMutation.isPending}>
+              {updateTimeMutation.isPending ? "Updating..." : "Yes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {showThankYou && (
         <Button
           size="lg"

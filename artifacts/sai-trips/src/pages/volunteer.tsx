@@ -19,6 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Clock, CheckCircle2, LogOut, ExternalLink } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -49,7 +50,7 @@ function formatAddress(visit: Visit): string {
 interface ConfirmModalProps {
   visit: Visit;
   onClose: () => void;
-  onConfirm: (completedAt: string, timeEdited: boolean) => void;
+  onConfirm: (completedAt: string, timeEdited: boolean, notes: string) => void;
   isPending: boolean;
 }
 
@@ -57,13 +58,14 @@ function ConfirmModal({ visit, onClose, onConfirm, isPending }: ConfirmModalProp
   const [time, setTime] = useState<string>(getLocalTime);
   const [originalTime] = useState<string>(getLocalTime);
   const [affirmation, setAffirmation] = useState("");
+  const [notes, setNotes] = useState("");
 
   const confirmed = affirmation.trim().toLowerCase() === "yes";
   const address = formatAddress(visit);
 
   const handleConfirm = () => {
     const timeEdited = time !== originalTime;
-    onConfirm(buildISOTimestamp(time), timeEdited);
+    onConfirm(buildISOTimestamp(time), timeEdited, notes.trim());
   };
 
   return (
@@ -89,6 +91,17 @@ function ConfirmModal({ visit, onClose, onConfirm, isPending }: ConfirmModalProp
               value={time}
               onChange={(e) => setTime(e.target.value)}
               className="w-full text-sm"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground font-medium">Notes <span className="text-muted-foreground/60">(optional)</span></label>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g. devotee was not home, extra attendees…"
+              className="text-sm resize-none"
+              rows={2}
             />
           </div>
 
@@ -140,10 +153,10 @@ export default function Volunteer() {
     setLocation("/login");
   };
 
-  const handleConfirm = (completedAt: string, timeEdited: boolean) => {
+  const handleConfirm = (completedAt: string, timeEdited: boolean, notes: string) => {
     if (!selectedVisit) return;
     volunteerComplete.mutate(
-      { id: selectedVisit.id, data: { completedAt, timeEdited } },
+      { id: selectedVisit.id, data: { completedAt, timeEdited, notes: notes || undefined } },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListVisitsQueryKey({ date: today }) });

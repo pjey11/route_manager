@@ -28,6 +28,8 @@ export * from "./templatesResponse";
 export * from "./updateAiSettingsBody";
 export * from "./updateProfileBody";
 export * from "./updateTemplateBody";
+export * from "./updateVisitTimeBody";
+export * from "./updateVisitTimeResponse";
 export * from "./uploadResponse";
 export * from "./uploadVisitsBody";
 export * from "./visit";

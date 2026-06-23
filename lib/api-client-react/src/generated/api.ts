@@ -38,6 +38,8 @@ import type {
   UpdateAiSettingsBody,
   UpdateProfileBody,
   UpdateTemplateBody,
+  UpdateVisitTimeBody,
+  UpdateVisitTimeResponse,
   UploadResponse,
   UploadVisitsBody,
   VisitActionResponse,
@@ -1123,6 +1125,93 @@ export const useLastHome = <
   TContext
 > => {
   return useMutation(getLastHomeMutationOptions(options));
+};
+
+/**
+ * @summary Update visit time and cascade the diff to all subsequent pending/started stops
+ */
+export const getUpdateVisitTimeUrl = (id: number) => {
+  return `/api/visits/${id}/time`;
+};
+
+export const updateVisitTime = async (
+  id: number,
+  updateVisitTimeBody: UpdateVisitTimeBody,
+  options?: RequestInit,
+): Promise<UpdateVisitTimeResponse> => {
+  return customFetch<UpdateVisitTimeResponse>(getUpdateVisitTimeUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateVisitTimeBody),
+  });
+};
+
+export const getUpdateVisitTimeMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateVisitTime>>,
+    TError,
+    { id: number; data: BodyType<UpdateVisitTimeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateVisitTime>>,
+  TError,
+  { id: number; data: BodyType<UpdateVisitTimeBody> },
+  TContext
+> => {
+  const mutationKey = ["updateVisitTime"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateVisitTime>>,
+    { id: number; data: BodyType<UpdateVisitTimeBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateVisitTime(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateVisitTimeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateVisitTime>>
+>;
+export type UpdateVisitTimeMutationBody = BodyType<UpdateVisitTimeBody>;
+export type UpdateVisitTimeMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Update visit time and cascade the diff to all subsequent pending/started stops
+ */
+export const useUpdateVisitTime = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateVisitTime>>,
+    TError,
+    { id: number; data: BodyType<UpdateVisitTimeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateVisitTime>>,
+  TError,
+  { id: number; data: BodyType<UpdateVisitTimeBody> },
+  TContext
+> => {
+  return useMutation(getUpdateVisitTimeMutationOptions(options));
 };
 
 /**
