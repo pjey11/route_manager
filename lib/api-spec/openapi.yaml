@@ -695,6 +695,18 @@ components:
           type: boolean
         batchId:
           type: integer
+        mapUrl:
+          type: string
+          nullable: true
+          description: Tiny URL for the map to this stop
+        completedAt:
+          type: string
+          nullable: true
+          description: ISO-8601 timestamp of when the stop was confirmed complete by the volunteer
+        timeEdited:
+          type: boolean
+          nullable: true
+          description: Whether the volunteer manually edited the completion time
       required:
         - id
         - date

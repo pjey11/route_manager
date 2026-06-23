@@ -19,7 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { MapPin, Clock, CheckCircle2, LogOut } from "lucide-react";
+import { MapPin, Clock, CheckCircle2, LogOut, ExternalLink } from "lucide-react";
 import { useLocation } from "wouter";
 
 function getLocalTime(): string {
@@ -241,6 +241,17 @@ export default function Volunteer() {
                     </span>
                   </a>
 
+                  {visit.mapUrl && (
+                    <a
+                      href={visit.mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-xs font-medium">Map</span>
+                    </a>
+                  )}
                   {visit.prasadOffering && (
                     <span className="inline-block text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
                       🪔 {visit.prasadOffering}

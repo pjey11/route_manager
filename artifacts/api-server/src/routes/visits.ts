@@ -43,8 +43,11 @@ function buildVisitResponse(visit: typeof visitsTable.$inferSelect, isFirst: boo
     isFirst,
     isLast,
     batchId: visit.batchId,
+    mapUrl: visit.mapUrl ?? undefined,
     lat: visit.lat ?? undefined,
     lng: visit.lng ?? undefined,
+    completedAt: visit.completedAt ? visit.completedAt.toISOString() : null,
+    timeEdited: visit.completionTimeEdited ?? null,
   };
 }
 
@@ -236,6 +239,7 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
         const city = String(row["city"]);
         const postalCode = String(row["postal code"]);
         const prasadOffering = String(row["prasad offering"] ?? "");
+        const mapUrl = row["map"] ? String(row["map"]) : null;
 
         let timeStr = String(rawTime);
         if (!isNaN(Number(rawTime))) {
@@ -254,6 +258,7 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
           city,
           postalCode,
           prasadOffering,
+          mapUrl,
           status: "pending",
         };
       });

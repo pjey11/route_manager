@@ -22,4 +22,10 @@ export interface Visit {
   isFirst: boolean;
   isLast: boolean;
   batchId: number;
+  /** Tiny URL for the map to this stop */
+  mapUrl?: string | null;
+  /** ISO-8601 timestamp of when the stop was confirmed complete by the volunteer */
+  completedAt?: string | null;
+  /** Whether the volunteer manually edited the completion time */
+  timeEdited?: boolean | null;
 }

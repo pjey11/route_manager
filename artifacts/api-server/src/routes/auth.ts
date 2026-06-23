@@ -9,9 +9,16 @@ declare module "express-session" {
   }
 }
 
+const adminPassword = process.env.ADMIN_PASSWORD;
+const volunteerPassword = process.env.VOLUNTEER_PASSWORD;
+
+if (!adminPassword || !volunteerPassword) {
+  throw new Error("ADMIN_PASSWORD and VOLUNTEER_PASSWORD environment variables must be set");
+}
+
 const USERS: { email: string; password: string; role: "admin" | "volunteer" }[] = [
-  { email: "saiadmin@twadmin.com", password: "5A18A8A", role: "admin" },
-  { email: "seva@twadmin.com", password: "SEVA2024", role: "volunteer" },
+  { email: "saiadmin@twadmin.com", password: adminPassword, role: "admin" },
+  { email: "seva@twadmin.com", password: volunteerPassword, role: "volunteer" },
 ];
 
 const router: IRouter = Router();
