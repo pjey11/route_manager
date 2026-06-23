@@ -64,8 +64,8 @@ function formatAddress(v: VisitFields): string {
 
 function buildRoster(visits: VisitFields[]): string {
   return visits
-    .map((v) => `${formatAddress(v)}\n${v.visitTime}\nPrasad: ${v.prasadOffering}`)
-    .join("\n\n");
+    .map((v) => `${formatAddress(v)}\nTentative time: ${v.visitTime}\nPrasad: ${v.prasadOffering}`)
+    .join("\n-------------------------------\n") + "\n-------------------------------";
 }
 
 function applyTemplate(content: string, visit: VisitFields, nextVisit?: VisitFields): string {
