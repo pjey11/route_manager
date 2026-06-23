@@ -695,6 +695,10 @@ components:
           type: boolean
         batchId:
           type: integer
+        mapUrl:
+          type: string
+          nullable: true
+          description: Tiny URL for the map to this stop
         completedAt:
           type: string
           nullable: true

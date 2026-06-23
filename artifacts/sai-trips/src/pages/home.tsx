@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
-import { Lock, MapPin, Phone, Clock, Upload, CheckCircle2, Check, Bell, ArrowRight, Heart } from "lucide-react";
+import { Lock, MapPin, Phone, Clock, Upload, CheckCircle2, Check, Bell, ArrowRight, Heart, ExternalLink } from "lucide-react";
 import { VisitPhotos } from "@/components/visit-photos";
 
 export default function Home() {
@@ -343,6 +343,17 @@ export default function Home() {
                             {visit.streetAddress}, {visit.city} {visit.postalCode}
                           </span>
                         </a>
+                        {visit.mapUrl && (
+                          <a
+                            href={visit.mapUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                          >
+                            <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-xs font-medium">Map</span>
+                          </a>
+                        )}
                         {visit.prasadOffering && (
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">

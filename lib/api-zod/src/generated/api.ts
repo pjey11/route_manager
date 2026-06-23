@@ -75,6 +75,10 @@ export const ListVisitsResponse = zod.object({
       isFirst: zod.boolean(),
       isLast: zod.boolean(),
       batchId: zod.number(),
+      mapUrl: zod
+        .string()
+        .nullish()
+        .describe("Tiny URL for the map to this stop"),
       completedAt: zod
         .string()
         .nullish()
@@ -145,6 +149,10 @@ export const StartVisitResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    mapUrl: zod
+      .string()
+      .nullish()
+      .describe("Tiny URL for the map to this stop"),
     completedAt: zod
       .string()
       .nullish()
@@ -185,6 +193,10 @@ export const CompleteVisitResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    mapUrl: zod
+      .string()
+      .nullish()
+      .describe("Tiny URL for the map to this stop"),
     completedAt: zod
       .string()
       .nullish()
@@ -225,6 +237,10 @@ export const EndVisitResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    mapUrl: zod
+      .string()
+      .nullish()
+      .describe("Tiny URL for the map to this stop"),
     completedAt: zod
       .string()
       .nullish()
@@ -265,6 +281,10 @@ export const EndDayResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    mapUrl: zod
+      .string()
+      .nullish()
+      .describe("Tiny URL for the map to this stop"),
     completedAt: zod
       .string()
       .nullish()
@@ -313,6 +333,10 @@ export const VolunteerCompleteResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    mapUrl: zod
+      .string()
+      .nullish()
+      .describe("Tiny URL for the map to this stop"),
     completedAt: zod
       .string()
       .nullish()
@@ -353,6 +377,10 @@ export const LastHomeResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    mapUrl: zod
+      .string()
+      .nullish()
+      .describe("Tiny URL for the map to this stop"),
     completedAt: zod
       .string()
       .nullish()
@@ -393,6 +421,10 @@ export const GeofenceAlertResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    mapUrl: zod
+      .string()
+      .nullish()
+      .describe("Tiny URL for the map to this stop"),
     completedAt: zod
       .string()
       .nullish()
@@ -431,6 +463,10 @@ export const SendGeofenceMessageResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    mapUrl: zod
+      .string()
+      .nullish()
+      .describe("Tiny URL for the map to this stop"),
     completedAt: zod
       .string()
       .nullish()
