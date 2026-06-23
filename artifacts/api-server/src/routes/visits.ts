@@ -453,12 +453,6 @@ router.post("/visits/:id/volunteer-complete", requireAuth, async (req, res): Pro
     return;
   }
 
-  const today = new Date().toISOString().split("T")[0];
-  if (visit.date !== today) {
-    res.status(403).json({ error: "Can only complete visits scheduled for today" });
-    return;
-  }
-
   if (visit.status !== "pending" && visit.status !== "started") {
     res.status(400).json({ error: "Visit is not in a completable state" });
     return;
