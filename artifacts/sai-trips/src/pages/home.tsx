@@ -475,7 +475,7 @@ export default function Home() {
                           className="w-full gap-2 text-sm"
                           size="sm"
                         >
-                          Next Home
+                          Palki Arrived → Next Stop
                           <ArrowRight className="w-4 h-4" />
                         </Button>
                       )}
