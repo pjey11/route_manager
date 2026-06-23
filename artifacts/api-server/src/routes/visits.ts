@@ -50,6 +50,7 @@ function buildVisitResponse(visit: typeof visitsTable.$inferSelect, isFirst: boo
     lng: visit.lng ?? undefined,
     completedAt: visit.completedAt ? visit.completedAt.toISOString() : null,
     timeEdited: visit.completionTimeEdited ?? null,
+    completionNotes: visit.completionNotes ?? null,
   };
 }
 

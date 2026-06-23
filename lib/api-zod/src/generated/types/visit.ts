@@ -28,4 +28,6 @@ export interface Visit {
   completedAt?: string | null;
   /** Whether the volunteer manually edited the completion time */
   timeEdited?: boolean | null;
+  /** Optional note left by the volunteer when marking the stop complete */
+  completionNotes?: string | null;
 }

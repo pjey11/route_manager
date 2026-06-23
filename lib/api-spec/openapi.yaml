@@ -744,6 +744,10 @@ components:
           type: boolean
           nullable: true
           description: Whether the volunteer manually edited the completion time
+        completionNotes:
+          type: string
+          nullable: true
+          description: Optional note left by the volunteer when marking the stop complete
       required:
         - id
         - date

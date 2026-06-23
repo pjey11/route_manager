@@ -445,6 +445,11 @@ export default function Home() {
                               edited
                             </span>
                           )}
+                          {visit.completionNotes && (
+                            <span className="mt-1.5 text-[11px] italic text-green-700/70 text-center leading-snug px-1">
+                              "{visit.completionNotes}"
+                            </span>
+                          )}
                         </div>
                       ) : !unlocked ? (
                         <div className="flex flex-col items-center justify-center text-muted-foreground py-2">
