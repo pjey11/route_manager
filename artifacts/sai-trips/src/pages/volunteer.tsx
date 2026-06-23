@@ -1,13 +1,14 @@
 import { useState } from "react";
 import {
   useListVisits,
+  useListVisitDates,
   getListVisitsQueryKey,
   useVolunteerComplete,
   useGetMe,
   type Visit,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +19,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Clock, CheckCircle2, LogOut, ExternalLink } from "lucide-react";
@@ -138,12 +146,14 @@ function ConfirmModal({ visit, onClose, onConfirm, isPending }: ConfirmModalProp
 
 export default function Volunteer() {
   const today = format(new Date(), "yyyy-MM-dd");
+  const [selectedDate, setSelectedDate] = useState<string>(today);
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { data: me } = useGetMe();
+  const { data: datesData } = useListVisitDates();
   const { data: visitsData, isLoading } = useListVisits(
-    { date: today },
-    { query: { queryKey: getListVisitsQueryKey({ date: today }) } }
+    { date: selectedDate },
+    { query: { queryKey: getListVisitsQueryKey({ date: selectedDate }) } }
   );
   const volunteerComplete = useVolunteerComplete();
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
@@ -159,7 +169,7 @@ export default function Volunteer() {
       { id: selectedVisit.id, data: { completedAt, timeEdited, notes: notes || undefined } },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListVisitsQueryKey({ date: today }) });
+          queryClient.invalidateQueries({ queryKey: getListVisitsQueryKey({ date: selectedDate }) });
           setSelectedVisit(null);
           toast.success("Stop marked complete. OmSaiRam!");
         },
@@ -195,16 +205,33 @@ export default function Volunteer() {
       <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-serif font-bold text-primary">Today's Seva</h1>
+            <h1 className="text-xl font-serif font-bold text-primary">Seva Schedule</h1>
             <p className="text-xs text-muted-foreground mt-0.5">{me?.email}</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5 text-muted-foreground">
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5 text-muted-foreground flex-shrink-0">
             <LogOut className="w-4 h-4" />
             Logout
           </Button>
         </div>
+
+        {/* Date selector */}
+        <Select value={selectedDate} onValueChange={setSelectedDate}>
+          <SelectTrigger className="w-full bg-card">
+            <SelectValue placeholder="Select date" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={today}>Today — {format(parseISO(today), "MMM d, yyyy")}</SelectItem>
+            {datesData?.dates
+              .filter(d => d !== today)
+              .map(date => (
+                <SelectItem key={date} value={date}>
+                  {format(parseISO(date), "MMM d, yyyy")}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
 
         {/* Loading */}
         {isLoading && (
@@ -216,7 +243,7 @@ export default function Volunteer() {
           <Card className="border-dashed border-2">
             <CardContent className="py-12 text-center text-muted-foreground flex flex-col items-center">
               <MapPin className="w-10 h-10 mb-3 opacity-20" />
-              <p className="font-medium text-sm">No visits scheduled for today.</p>
+              <p className="font-medium text-sm">No visits scheduled for this date.</p>
             </CardContent>
           </Card>
         )}
