@@ -397,6 +397,23 @@ export const LastHomeResponse = zod.object({
 });
 
 /**
+ * @summary Update visit time and cascade the diff to all subsequent pending/started stops
+ */
+export const UpdateVisitTimeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateVisitTimeBody = zod.object({
+  visitTime: zod.string().describe("New visit time in HH:MM format"),
+});
+
+export const UpdateVisitTimeResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string(),
+  updatedCount: zod.number(),
+});
+
+/**
  * @summary Log that user is within 500m - returns template 2 message for manual send
  */
 export const GeofenceAlertParams = zod.object({

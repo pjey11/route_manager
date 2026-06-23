@@ -12,6 +12,8 @@ import {
   LastHomeParams,
   VolunteerCompleteParams,
   VolunteerCompleteBody,
+  UpdateVisitTimeParams,
+  UpdateVisitTimeBody,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/requireAuth";
 import { requireAdmin } from "../middlewares/requireAdmin";
@@ -60,6 +62,18 @@ type VisitFields = { streetAddress: string; city: string; postalCode: string; pr
 
 function formatAddress(v: VisitFields): string {
   return `${v.streetAddress}, ${v.city} ${v.postalCode}`;
+}
+
+function timeToMinutes(t: string): number {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function minutesToTime(minutes: number): string {
+  const clamped = ((minutes % 1440) + 1440) % 1440;
+  const h = Math.floor(clamped / 60);
+  const m = clamped % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
 function buildRoster(visits: VisitFields[]): string {
@@ -547,6 +561,63 @@ router.post("/visits/:id/end-day", requireAdmin, async (req, res): Promise<void>
     visit: buildVisitResponse(updated, idx === 0, idx === allVisits.length - 1),
     whatsappSent: waResult.success,
     whatsappError: waResult.error,
+  });
+});
+
+router.patch("/visits/:id/time", requireAdmin, async (req, res): Promise<void> => {
+  const parsedParams = UpdateVisitTimeParams.safeParse(req.params);
+  if (!parsedParams.success) {
+    res.status(400).json({ error: "Invalid visit ID" });
+    return;
+  }
+  const id = parsedParams.data.id;
+
+  const parsedBody = UpdateVisitTimeBody.safeParse(req.body);
+  if (!parsedBody.success) {
+    res.status(400).json({ error: "Invalid visit time format" });
+    return;
+  }
+  const { visitTime: newTime } = parsedBody.data;
+
+  const [visit] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
+  if (!visit) {
+    res.status(404).json({ error: "Visit not found" });
+    return;
+  }
+
+  if (visit.status === "completed" || visit.status === "ended" || visit.status === "day_ended") {
+    res.status(403).json({ error: "Cannot edit time for a completed visit" });
+    return;
+  }
+
+  const diffMinutes = timeToMinutes(newTime) - timeToMinutes(visit.visitTime);
+
+  await db.update(visitsTable)
+    .set({ visitTime: newTime })
+    .where(eq(visitsTable.id, id));
+
+  const allVisits = await db.select()
+    .from(visitsTable)
+    .where(eq(visitsTable.date, visit.date))
+    .orderBy(asc(visitsTable.stopNumber));
+
+  const toUpdate = allVisits.filter(
+    v => v.id !== id &&
+      (v.status === "pending" || v.status === "started") &&
+      v.stopNumber > visit.stopNumber
+  );
+
+  for (const v of toUpdate) {
+    await db.update(visitsTable)
+      .set({ visitTime: minutesToTime(timeToMinutes(v.visitTime) + diffMinutes) })
+      .where(eq(visitsTable.id, v.id));
+  }
+
+  const updatedCount = 1 + toUpdate.length;
+  res.json({
+    success: true,
+    message: `Visit times updated for ${updatedCount} stop${updatedCount !== 1 ? "s" : ""}`,
+    updatedCount,
   });
 });
 
