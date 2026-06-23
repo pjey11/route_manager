@@ -29,6 +29,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Clock, CheckCircle2, LogOut, ExternalLink } from "lucide-react";
+import { VisitPhotos } from "@/components/visit-photos";
 import { useLocation } from "wouter";
 
 function getLocalTime(): string {
@@ -311,6 +312,7 @@ export default function Volunteer() {
                       Complete Trip
                     </Button>
                   </CardContent>
+                  <VisitPhotos visitId={visit.id} />
                 </Card>
               );
             })}
