@@ -125,7 +125,7 @@ router.get("/visits", requireAuth, async (req, res): Promise<void> => {
 
   let activeIndex: number | undefined;
   for (let i = 0; i < visitList.length; i++) {
-    if (visitList[i].status === "pending" || visitList[i].status === "started") {
+    if (visitList[i].status === "pending" || visitList[i].status === "started" || visitList[i].status === "in_transit") {
       activeIndex = i;
       break;
     }
@@ -358,7 +358,7 @@ router.post("/visits/:id/complete", requireAdmin, async (req, res): Promise<void
     return;
   }
 
-  await db.update(visitsTable).set({ status: "completed", completedAt: new Date() }).where(eq(visitsTable.id, id));
+  await db.update(visitsTable).set({ status: "in_transit" }).where(eq(visitsTable.id, id));
   const [updated] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
 
   const allVisits = await db
@@ -453,7 +453,7 @@ router.post("/visits/:id/volunteer-complete", requireAuth, async (req, res): Pro
     return;
   }
 
-  if (visit.status !== "pending" && visit.status !== "started") {
+  if (visit.status !== "pending" && visit.status !== "started" && visit.status !== "in_transit") {
     res.status(400).json({ error: "Visit is not in a completable state" });
     return;
   }

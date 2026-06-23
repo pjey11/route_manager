@@ -725,7 +725,7 @@ components:
           type: string
         status:
           type: string
-          enum: [pending, started, completed, ended, day_ended]
+          enum: [pending, started, in_transit, completed, ended, day_ended]
         isFirst:
           type: boolean
         isLast:

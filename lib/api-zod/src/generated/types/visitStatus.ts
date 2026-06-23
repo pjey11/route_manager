@@ -11,6 +11,7 @@ export type VisitStatus = (typeof VisitStatus)[keyof typeof VisitStatus];
 export const VisitStatus = {
   pending: "pending",
   started: "started",
+  in_transit: "in_transit",
   completed: "completed",
   ended: "ended",
   day_ended: "day_ended",
