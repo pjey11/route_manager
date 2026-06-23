@@ -23,7 +23,7 @@ import { geocodeAddress } from "../lib/geocode";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "phone number", "street address", "city", "postal code", "prasad offering"];
+const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "street address", "city", "postal code", "prasad offering"];
 
 function normalizeHeader(h: string): string {
   return h.toLowerCase().trim();
@@ -172,7 +172,7 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
 
     if (missingCols.length > 0) {
       res.status(400).json({
-        error: `Missing required columns: ${missingCols.join(", ")}. The file must contain all of these columns: Date, Stop Number, Anticipated Visit Time, Name, Phone Number, Street Address, City, Postal Code, Prasad Offering.`,
+        error: `Missing required columns: ${missingCols.join(", ")}. The file must contain all of these columns: Date, Stop Number, Anticipated Visit Time, Street Address, City, Postal Code, Prasad Offering.`,
       });
       return;
     }
@@ -188,12 +188,11 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
       const dateVal = row["date"] ?? null;
       const stopVal = row["stop number"] ?? null;
       const timeVal = row["anticipated visit time"] ?? null;
-      const phoneVal = row["phone number"] ?? null;
       const streetVal = row["street address"] ?? null;
       const cityVal = row["city"] ?? null;
       const postalVal = row["postal code"] ?? null;
       const prasadVal = row["prasad offering"] ?? null;
-      if (dateVal == null || stopVal == null || timeVal == null || phoneVal == null || streetVal == null || cityVal == null || postalVal == null || prasadVal == null) {
+      if (dateVal == null || stopVal == null || timeVal == null || streetVal == null || cityVal == null || postalVal == null || prasadVal == null) {
         return i + 1;
       }
       return null;
@@ -248,7 +247,7 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
       const visitInserts = dateRows.map((row) => {
         const rawStop = row["stop number"];
         const rawTime = row["anticipated visit time"];
-        const phone = String(row["phone number"]);
+        const phone = row["phone number"] ? String(row["phone number"]) : "";
         const streetAddress = String(row["street address"]);
         const city = String(row["city"]);
         const postalCode = String(row["postal code"]);
