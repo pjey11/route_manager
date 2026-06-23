@@ -102,8 +102,7 @@ router.get("/visits/dates", requireAuth, async (_req, res): Promise<void> => {
 router.get("/visits", requireAuth, async (req, res): Promise<void> => {
   const parsed = ListVisitsQueryParams.safeParse(req.query);
   const today = new Date().toISOString().split("T")[0];
-  const isVolunteer = req.session.role === "volunteer";
-  const date = isVolunteer ? today : (parsed.success && parsed.data.date ? parsed.data.date : today);
+  const date = parsed.success && parsed.data.date ? parsed.data.date : today;
 
   const visits = await db
     .select()
