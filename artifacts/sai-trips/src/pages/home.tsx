@@ -229,7 +229,7 @@ export default function Home() {
     return prev.status !== "pending" && prev.status !== "started";
   };
 
-  const isDone = (status: string) => ["completed", "ended", "day_ended"].includes(status);
+  const isDone = (status: string) => ["in_transit", "completed", "ended", "day_ended"].includes(status);
 
   const visits = visitsData?.visits ?? [];
   const dayStarted = visits.some(v => v.status !== "pending");

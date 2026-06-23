@@ -180,24 +180,26 @@ export default function Volunteer() {
 
   const visits = visitsData?.visits ?? [];
   const activeIndex = visitsData?.activeIndex;
-  const activeVisits = visits.filter(v => v.status === "pending" || v.status === "started");
-  const doneVisits = visits.filter(v => !["pending", "started"].includes(v.status));
+  const activeVisits = visits.filter(v => v.status === "pending" || v.status === "started" || v.status === "in_transit");
+  const doneVisits = visits.filter(v => !["pending", "started", "in_transit"].includes(v.status));
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "pending":   return "bg-gray-100 text-gray-600 border-gray-200";
-      case "started":   return "bg-amber-100 text-amber-700 border-amber-200";
-      case "completed": return "bg-green-100 text-green-700 border-green-200";
-      default:          return "bg-gray-100 text-gray-600 border-gray-200";
+      case "pending":    return "bg-gray-100 text-gray-600 border-gray-200";
+      case "started":    return "bg-amber-100 text-amber-700 border-amber-200";
+      case "in_transit": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "completed":  return "bg-green-100 text-green-700 border-green-200";
+      default:           return "bg-gray-100 text-gray-600 border-gray-200";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "pending":   return "Pending";
-      case "started":   return "En Route";
-      case "completed": return "Completed";
-      default:          return status;
+      case "pending":    return "Pending";
+      case "started":    return "En Route";
+      case "in_transit": return "Palki Moved On";
+      case "completed":  return "Completed";
+      default:           return status;
     }
   };
 
