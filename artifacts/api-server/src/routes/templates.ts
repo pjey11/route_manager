@@ -92,7 +92,12 @@ router.put("/templates/:id", requireAdmin, async (req, res): Promise<void> => {
 
   const [updated] = await db
     .update(notificationTemplatesTable)
-    .set({ content: body.data.content, updatedAt: new Date() })
+    .set({
+      content: body.data.content,
+      ...(body.data.name !== undefined && { name: body.data.name }),
+      ...(body.data.description !== undefined && { description: body.data.description }),
+      updatedAt: new Date(),
+    })
     .where(eq(notificationTemplatesTable.id, params.data.id))
     .returning();
 
