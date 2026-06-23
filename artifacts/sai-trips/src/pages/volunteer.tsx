@@ -180,10 +180,7 @@ export default function Volunteer() {
 
   const visits = visitsData?.visits ?? [];
   const activeIndex = visitsData?.activeIndex;
-  const currentVisit = activeIndex !== undefined ? visits[activeIndex] : undefined;
-  const upcomingVisits = visits.filter((v, i) =>
-    (v.status === "pending" || v.status === "started") && i !== activeIndex
-  );
+  const activeVisits = visits.filter(v => v.status === "pending" || v.status === "started");
   const doneVisits = visits.filter(v => !["pending", "started"].includes(v.status));
 
   const getStatusBadge = (status: string) => {
@@ -252,83 +249,69 @@ export default function Volunteer() {
           </Card>
         )}
 
-        {/* Current active visit */}
-        {currentVisit && (
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Current Stop</p>
-            <Card className={`${currentVisit.status === "started" ? "ring-2 ring-primary/40 shadow-md" : "ring-1 ring-primary/20"}`}>
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/20 text-primary font-bold text-xs flex-shrink-0">
-                      {currentVisit.stopNumber}
-                    </span>
-                    <div className="flex items-center gap-1.5 text-sm font-medium">
-                      <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                      {currentVisit.visitTime}
+        {/* Active visits */}
+        {activeVisits.length > 0 && (
+          <div className="space-y-3">
+            {activeVisits.map((visit) => {
+              const isCurrent = activeIndex !== undefined && visits.indexOf(visit) === activeIndex;
+              return (
+                <Card key={visit.id} className={`${isCurrent ? "ring-2 ring-primary/40 shadow-md" : ""}`}>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/20 text-primary font-bold text-xs flex-shrink-0">
+                          {visit.stopNumber}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-sm font-medium">
+                          <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                          {visit.visitTime}
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(visit.status)}`}>
+                        {isCurrent ? "Current" : getStatusLabel(visit.status)}
+                      </span>
                     </div>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(currentVisit.status)}`}>
-                    {getStatusLabel(currentVisit.status)}
-                  </span>
-                </div>
 
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${currentVisit.streetAddress}, ${currentVisit.city}, ${currentVisit.postalCode}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
-                >
-                  <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:text-primary" />
-                  <span className="group-hover:underline">
-                    {currentVisit.streetAddress}, {currentVisit.city} {currentVisit.postalCode}
-                  </span>
-                </a>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${visit.streetAddress}, ${visit.city}, ${visit.postalCode}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-start gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+                    >
+                      <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:text-primary" />
+                      <span className="group-hover:underline">
+                        {visit.streetAddress}, {visit.city} {visit.postalCode}
+                      </span>
+                    </a>
 
-                {currentVisit.mapUrl && (
-                  <a
-                    href={currentVisit.mapUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-                  >
-                    <ExternalLink className="w-4 h-4 flex-shrink-0" />
-                    <span className="text-xs font-medium">Map</span>
-                  </a>
-                )}
-                {currentVisit.prasadOffering && (
-                  <span className="inline-block text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
-                    🪔 {currentVisit.prasadOffering}
-                  </span>
-                )}
+                    {visit.mapUrl && (
+                      <a
+                        href={visit.mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                      >
+                        <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-xs font-medium">Map</span>
+                      </a>
+                    )}
+                    {visit.prasadOffering && (
+                      <span className="inline-block text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
+                        🪔 {visit.prasadOffering}
+                      </span>
+                    )}
 
-                <Button
-                  className="w-full"
-                  onClick={() => setSelectedVisit(currentVisit)}
-                  disabled={volunteerComplete.isPending}
-                >
-                  Complete Trip
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Upcoming visits — no action button */}
-        {upcomingVisits.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Upcoming</p>
-            {upcomingVisits.map((visit) => (
-              <div key={visit.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border">
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-muted text-muted-foreground font-bold text-xs flex-shrink-0">
-                  {visit.stopNumber}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate">{visit.streetAddress}, {visit.city}</p>
-                  <p className="text-xs text-muted-foreground">{visit.visitTime}</p>
-                </div>
-              </div>
-            ))}
+                    <Button
+                      className="w-full"
+                      onClick={() => setSelectedVisit(visit)}
+                      disabled={volunteerComplete.isPending}
+                    >
+                      Complete Trip
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 
