@@ -358,7 +358,7 @@ router.post("/visits/:id/complete", requireAdmin, async (req, res): Promise<void
     return;
   }
 
-  await db.update(visitsTable).set({ status: "completed" }).where(eq(visitsTable.id, id));
+  await db.update(visitsTable).set({ status: "completed", completedAt: new Date() }).where(eq(visitsTable.id, id));
   const [updated] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
 
   const allVisits = await db
@@ -402,7 +402,7 @@ router.post("/visits/:id/end", requireAdmin, async (req, res): Promise<void> => 
     return;
   }
 
-  await db.update(visitsTable).set({ status: "ended" }).where(eq(visitsTable.id, id));
+  await db.update(visitsTable).set({ status: "ended", completedAt: new Date() }).where(eq(visitsTable.id, id));
   const [updated] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
 
   const allVisits = await db
