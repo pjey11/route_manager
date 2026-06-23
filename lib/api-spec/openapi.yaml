@@ -695,6 +695,14 @@ components:
           type: boolean
         batchId:
           type: integer
+        completedAt:
+          type: string
+          nullable: true
+          description: ISO-8601 timestamp of when the stop was confirmed complete by the volunteer
+        timeEdited:
+          type: boolean
+          nullable: true
+          description: Whether the volunteer manually edited the completion time
       required:
         - id
         - date

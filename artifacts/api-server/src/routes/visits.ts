@@ -45,6 +45,8 @@ function buildVisitResponse(visit: typeof visitsTable.$inferSelect, isFirst: boo
     batchId: visit.batchId,
     lat: visit.lat ?? undefined,
     lng: visit.lng ?? undefined,
+    completedAt: visit.completedAt ? visit.completedAt.toISOString() : null,
+    timeEdited: visit.completionTimeEdited ?? null,
   };
 }
 

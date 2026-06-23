@@ -75,6 +75,16 @@ export const ListVisitsResponse = zod.object({
       isFirst: zod.boolean(),
       isLast: zod.boolean(),
       batchId: zod.number(),
+      completedAt: zod
+        .string()
+        .nullish()
+        .describe(
+          "ISO-8601 timestamp of when the stop was confirmed complete by the volunteer",
+        ),
+      timeEdited: zod
+        .boolean()
+        .nullish()
+        .describe("Whether the volunteer manually edited the completion time"),
     }),
   ),
   date: zod.string(),
@@ -135,6 +145,16 @@ export const StartVisitResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    completedAt: zod
+      .string()
+      .nullish()
+      .describe(
+        "ISO-8601 timestamp of when the stop was confirmed complete by the volunteer",
+      ),
+    timeEdited: zod
+      .boolean()
+      .nullish()
+      .describe("Whether the volunteer manually edited the completion time"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -165,6 +185,16 @@ export const CompleteVisitResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    completedAt: zod
+      .string()
+      .nullish()
+      .describe(
+        "ISO-8601 timestamp of when the stop was confirmed complete by the volunteer",
+      ),
+    timeEdited: zod
+      .boolean()
+      .nullish()
+      .describe("Whether the volunteer manually edited the completion time"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -195,6 +225,16 @@ export const EndVisitResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    completedAt: zod
+      .string()
+      .nullish()
+      .describe(
+        "ISO-8601 timestamp of when the stop was confirmed complete by the volunteer",
+      ),
+    timeEdited: zod
+      .boolean()
+      .nullish()
+      .describe("Whether the volunteer manually edited the completion time"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -225,6 +265,16 @@ export const EndDayResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    completedAt: zod
+      .string()
+      .nullish()
+      .describe(
+        "ISO-8601 timestamp of when the stop was confirmed complete by the volunteer",
+      ),
+    timeEdited: zod
+      .boolean()
+      .nullish()
+      .describe("Whether the volunteer manually edited the completion time"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -263,6 +313,16 @@ export const VolunteerCompleteResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    completedAt: zod
+      .string()
+      .nullish()
+      .describe(
+        "ISO-8601 timestamp of when the stop was confirmed complete by the volunteer",
+      ),
+    timeEdited: zod
+      .boolean()
+      .nullish()
+      .describe("Whether the volunteer manually edited the completion time"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -293,6 +353,16 @@ export const LastHomeResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    completedAt: zod
+      .string()
+      .nullish()
+      .describe(
+        "ISO-8601 timestamp of when the stop was confirmed complete by the volunteer",
+      ),
+    timeEdited: zod
+      .boolean()
+      .nullish()
+      .describe("Whether the volunteer manually edited the completion time"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -323,6 +393,16 @@ export const GeofenceAlertResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    completedAt: zod
+      .string()
+      .nullish()
+      .describe(
+        "ISO-8601 timestamp of when the stop was confirmed complete by the volunteer",
+      ),
+    timeEdited: zod
+      .boolean()
+      .nullish()
+      .describe("Whether the volunteer manually edited the completion time"),
   }),
 });
 
@@ -351,6 +431,16 @@ export const SendGeofenceMessageResponse = zod.object({
     isFirst: zod.boolean(),
     isLast: zod.boolean(),
     batchId: zod.number(),
+    completedAt: zod
+      .string()
+      .nullish()
+      .describe(
+        "ISO-8601 timestamp of when the stop was confirmed complete by the volunteer",
+      ),
+    timeEdited: zod
+      .boolean()
+      .nullish()
+      .describe("Whether the volunteer manually edited the completion time"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),

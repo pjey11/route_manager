@@ -356,9 +356,19 @@ export default function Home() {
                     {/* Right: Action */}
                     <div className="p-4 md:p-5 md:w-52 flex-shrink-0 flex flex-col justify-center border-t md:border-t-0 md:border-l border-border bg-muted/10">
                       {done ? (
-                        <div className="flex flex-col items-center justify-center text-green-600 py-2">
+                        <div className="flex flex-col items-center justify-center text-green-600 py-2 gap-0.5">
                           <Check className="w-7 h-7 mb-1" />
                           <span className="text-sm font-medium">Complete</span>
+                          {visit.completedAt && (
+                            <span className="text-xs text-green-700/80 font-normal">
+                              {format(new Date(visit.completedAt), "h:mm a")}
+                            </span>
+                          )}
+                          {visit.timeEdited && (
+                            <span className="mt-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                              edited
+                            </span>
+                          )}
                         </div>
                       ) : !unlocked ? (
                         <div className="flex flex-col items-center justify-center text-muted-foreground py-2">
