@@ -89,6 +89,12 @@ export const ListVisitsResponse = zod.object({
         .boolean()
         .nullish()
         .describe("Whether the volunteer manually edited the completion time"),
+      completionNotes: zod
+        .string()
+        .nullish()
+        .describe(
+          "Optional note left by the volunteer when marking the stop complete",
+        ),
     }),
   ),
   date: zod.string(),
@@ -163,6 +169,12 @@ export const StartVisitResponse = zod.object({
       .boolean()
       .nullish()
       .describe("Whether the volunteer manually edited the completion time"),
+    completionNotes: zod
+      .string()
+      .nullish()
+      .describe(
+        "Optional note left by the volunteer when marking the stop complete",
+      ),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -207,6 +219,12 @@ export const CompleteVisitResponse = zod.object({
       .boolean()
       .nullish()
       .describe("Whether the volunteer manually edited the completion time"),
+    completionNotes: zod
+      .string()
+      .nullish()
+      .describe(
+        "Optional note left by the volunteer when marking the stop complete",
+      ),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -251,6 +269,12 @@ export const EndVisitResponse = zod.object({
       .boolean()
       .nullish()
       .describe("Whether the volunteer manually edited the completion time"),
+    completionNotes: zod
+      .string()
+      .nullish()
+      .describe(
+        "Optional note left by the volunteer when marking the stop complete",
+      ),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -295,6 +319,12 @@ export const EndDayResponse = zod.object({
       .boolean()
       .nullish()
       .describe("Whether the volunteer manually edited the completion time"),
+    completionNotes: zod
+      .string()
+      .nullish()
+      .describe(
+        "Optional note left by the volunteer when marking the stop complete",
+      ),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -347,6 +377,12 @@ export const VolunteerCompleteResponse = zod.object({
       .boolean()
       .nullish()
       .describe("Whether the volunteer manually edited the completion time"),
+    completionNotes: zod
+      .string()
+      .nullish()
+      .describe(
+        "Optional note left by the volunteer when marking the stop complete",
+      ),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -391,6 +427,12 @@ export const LastHomeResponse = zod.object({
       .boolean()
       .nullish()
       .describe("Whether the volunteer manually edited the completion time"),
+    completionNotes: zod
+      .string()
+      .nullish()
+      .describe(
+        "Optional note left by the volunteer when marking the stop complete",
+      ),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -452,6 +494,12 @@ export const GeofenceAlertResponse = zod.object({
       .boolean()
       .nullish()
       .describe("Whether the volunteer manually edited the completion time"),
+    completionNotes: zod
+      .string()
+      .nullish()
+      .describe(
+        "Optional note left by the volunteer when marking the stop complete",
+      ),
   }),
 });
 
@@ -494,6 +542,12 @@ export const SendGeofenceMessageResponse = zod.object({
       .boolean()
       .nullish()
       .describe("Whether the volunteer manually edited the completion time"),
+    completionNotes: zod
+      .string()
+      .nullish()
+      .describe(
+        "Optional note left by the volunteer when marking the stop complete",
+      ),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
