@@ -27,14 +27,30 @@ router.post("/notifications/bulk", requireAdmin, async (req, res): Promise<void>
     return;
   }
 
-  const stopLines = visits
-    .map((v) => `  ${v.stopNumber}. ${v.visitTime} — ${v.streetAddress}, ${v.city}`)
-    .join("\n");
+  const dateObj = new Date(`${date}T12:00:00`);
+  const monthDay = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  const formatTime = (t: string) => {
+    const [hh, mm] = t.split(":");
+    const h = parseInt(hh, 10);
+    const period = h >= 12 ? "PM" : "AM";
+    const h12 = h % 12 || 12;
+    return `${h12}:${mm} ${period}`;
+  };
+
+  const stopLines = visits.map((v) => {
+    const lines = [
+      `Time: ${formatTime(v.visitTime)}`,
+      v.streetAddress,
+      `${v.city} ${v.postalCode}`,
+    ];
+    if (v.prasadOffering) lines.push(`Prasad: ${v.prasadOffering}`);
+    return lines.join("\n");
+  }).join("\n\n");
 
   const message =
-    `🙏 OmSaiRam! Today's Sai Palki route (${date}):\n\n` +
-    `${stopLines}\n\n` +
-    `Please keep your home ready at the appointed time. Jai Sairam!`;
+    `OmSaiRam! Palki begins today, ${monthDay}. Baba will be visiting the following homes:\n\n` +
+    stopLines;
 
   const result = await sendGroupMessage(message);
 
