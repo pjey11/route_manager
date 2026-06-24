@@ -77,10 +77,24 @@ function minutesToTime(minutes: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+function formatTime12h(t: string): string {
+  const [hh, mm] = t.split(":");
+  const h = parseInt(hh, 10);
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 || 12;
+  return `${h12}:${mm} ${period}`;
+}
+
 function buildRoster(visits: VisitFields[]): string {
-  return visits
-    .map((v) => `${formatAddress(v)}\nTentative time: ${v.visitTime}\nPrasad: ${v.prasadOffering}`)
-    .join("\n-------------------------------\n") + "\n-------------------------------";
+  return visits.map((v) => {
+    const lines = [
+      `Time: ${formatTime12h(v.visitTime)}`,
+      v.streetAddress,
+      `${v.city} ${v.postalCode}`,
+    ];
+    if (v.prasadOffering) lines.push(`Prasad: ${v.prasadOffering}`);
+    return lines.join("\n");
+  }).join("\n\n");
 }
 
 function applyTemplate(content: string, visit: VisitFields, nextVisit?: VisitFields): string {
@@ -329,10 +343,10 @@ router.post("/visits/:id/start", requireAdmin, async (req, res): Promise<void> =
     .orderBy(asc(visitsTable.stopNumber));
   const idx = allVisits.findIndex((v) => v.id === id);
 
-  const templateContent = await getTemplate(1);
-  const baseMessage = applyTemplate(templateContent, visit);
+  const dateObj = new Date(`${visit.date}T12:00:00`);
+  const monthDay = dateObj.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
   const roster = buildRoster(allVisits);
-  const message = `${baseMessage}\n\n${roster}`;
+  const message = `OmSaiRam! Palki begins for the day, ${monthDay}! Baba will be visiting the following homes:\n\n${roster}`;
   const waResult = await sendGroupMessage(message);
 
   res.json({
