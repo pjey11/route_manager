@@ -206,6 +206,7 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
     }
 
     const headers = Object.keys(rows[0]).map(normalizeHeader);
+    req.log.info({ headers }, "Uploaded file column headers detected");
     const missingCols = REQUIRED_COLUMNS.filter((col) => !headers.includes(col));
 
     if (missingCols.length > 0) {
