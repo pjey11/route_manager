@@ -195,18 +195,46 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
       Object.fromEntries(Object.entries(row).map(([k, v]) => [normalizeHeader(k), v]))
     );
 
+    // Extract hyperlink URLs for the "map url" column (Excel stores URLs as hyperlinks,
+    // which sheet_to_json does not include in cell values)
+    const hyperlinkMapUrls = new Map<number, string>();
+    const sheetRef = sheet["!ref"];
+    if (sheetRef) {
+      const range = XLSX.utils.decode_range(sheetRef);
+      let mapUrlColIdx = -1;
+      for (let c = range.s.c; c <= range.e.c; c++) {
+        const hCell = sheet[XLSX.utils.encode_cell({ r: range.s.r, c })];
+        if (hCell && normalizeHeader(String(hCell.v ?? "")) === "map url") {
+          mapUrlColIdx = c;
+          break;
+        }
+      }
+      if (mapUrlColIdx !== -1) {
+        for (let r = range.s.r + 1; r <= range.e.r; r++) {
+          const cell = sheet[XLSX.utils.encode_cell({ r, c: mapUrlColIdx })];
+          if (cell?.l?.Target) {
+            hyperlinkMapUrls.set(r - range.s.r - 1, cell.l.Target);
+          }
+        }
+      }
+    }
+
     // Strip completely blank rows (all values null) that Excel often appends
-    const rows = allRows.filter((row) =>
-      Object.values(row).some((v) => v !== null && v !== "")
-    );
+    const indexedRows = allRows
+      .map((row, i) => ({ row, i }))
+      .filter(({ row }) => Object.values(row).some((v) => v !== null && v !== ""));
+    const rows = indexedRows.map(({ row, i }) => ({
+      ...row,
+      __rowIdx: i,
+    }));
 
     if (rows.length === 0) {
       res.status(400).json({ error: "The uploaded file contains no data rows." });
       return;
     }
 
-    const headers = Object.keys(rows[0]).map(normalizeHeader);
-    req.log.info({ headers }, "Uploaded file column headers detected");
+    const headers = Object.keys(rows[0]).filter(h => h !== "__rowIdx").map(normalizeHeader);
+    req.log.info({ headers, hyperlinkMapUrlCount: hyperlinkMapUrls.size }, "Uploaded file column headers detected");
     const missingCols = REQUIRED_COLUMNS.filter((col) => !headers.includes(col));
 
     if (missingCols.length > 0) {
@@ -292,7 +320,8 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
         const postalCode = String(row["postal code"]);
         const prasadOffering = String(row["prasad offering"] ?? "");
         const rawMapUrl = row["map url"] ?? row["map_url"] ?? row["map"] ?? null;
-        const mapUrl = rawMapUrl ? String(rawMapUrl) : null;
+        const rowIdx = row["__rowIdx"] as number;
+        const mapUrl = (rawMapUrl ? String(rawMapUrl) : null) || hyperlinkMapUrls.get(rowIdx) || null;
 
         let timeStr = String(rawTime);
         if (!isNaN(Number(rawTime))) {
