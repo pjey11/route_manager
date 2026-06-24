@@ -338,7 +338,7 @@ router.post("/visits/:id/start", requireAdmin, async (req, res): Promise<void> =
   const dateObj = new Date(`${visit.date}T12:00:00`);
   const monthDay = dateObj.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
   const roster = buildRoster(allVisits);
-  const message = `OmSaiRam! Palki begins for the day, ${monthDay}! Baba will be visiting the following homes:\n\n${roster}`;
+  const message = `OmSaiRam! Palki begins today, ${monthDay}! Baba will be visiting the following homes:\n\n${roster}`;
   const waResult = await sendGroupMessage(message);
 
   res.json({
