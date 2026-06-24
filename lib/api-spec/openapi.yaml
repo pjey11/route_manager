@@ -697,6 +697,9 @@ components:
           type: string
         timeEdited:
           type: boolean
+        devoteesAttended:
+          type: integer
+          description: Number of devotees attended at this stop
       required:
         - completedAt
 
@@ -748,6 +751,10 @@ components:
           type: string
           nullable: true
           description: Optional note left by the volunteer when marking the stop complete
+        devoteesAttended:
+          type: integer
+          nullable: true
+          description: Number of devotees attended at this stop
       required:
         - id
         - date

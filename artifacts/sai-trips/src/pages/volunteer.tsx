@@ -59,7 +59,7 @@ function formatAddress(visit: Visit): string {
 interface ConfirmModalProps {
   visit: Visit;
   onClose: () => void;
-  onConfirm: (completedAt: string, timeEdited: boolean, notes: string) => void;
+  onConfirm: (completedAt: string, timeEdited: boolean, notes: string, devoteesAttended: number | undefined) => void;
   isPending: boolean;
 }
 
@@ -68,13 +68,15 @@ function ConfirmModal({ visit, onClose, onConfirm, isPending }: ConfirmModalProp
   const [originalTime] = useState<string>(getLocalTime);
   const [affirmation, setAffirmation] = useState("");
   const [notes, setNotes] = useState("");
+  const [devoteesAttended, setDevoteesAttended] = useState<string>("");
 
   const confirmed = affirmation.trim().toLowerCase() === "yes";
   const address = formatAddress(visit);
 
   const handleConfirm = () => {
     const timeEdited = time !== originalTime;
-    onConfirm(buildISOTimestamp(time), timeEdited, notes.trim());
+    const devotees = devoteesAttended.trim() !== "" ? parseInt(devoteesAttended, 10) : undefined;
+    onConfirm(buildISOTimestamp(time), timeEdited, notes.trim(), devotees);
   };
 
   return (
@@ -99,6 +101,18 @@ function ConfirmModal({ visit, onClose, onConfirm, isPending }: ConfirmModalProp
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
+              className="w-full text-sm"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground font-medium">Devotees attended <span className="text-muted-foreground/60">(optional)</span></label>
+            <Input
+              type="number"
+              min={0}
+              value={devoteesAttended}
+              onChange={(e) => setDevoteesAttended(e.target.value)}
+              placeholder="e.g. 5"
               className="w-full text-sm"
             />
           </div>
@@ -164,10 +178,10 @@ export default function Volunteer() {
     setLocation("/login");
   };
 
-  const handleConfirm = (completedAt: string, timeEdited: boolean, notes: string) => {
+  const handleConfirm = (completedAt: string, timeEdited: boolean, notes: string, devoteesAttended: number | undefined) => {
     if (!selectedVisit) return;
     volunteerComplete.mutate(
-      { id: selectedVisit.id, data: { completedAt, timeEdited, notes: notes || undefined } },
+      { id: selectedVisit.id, data: { completedAt, timeEdited, notes: notes || undefined, devoteesAttended } },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListVisitsQueryKey({ date: selectedDate }) });

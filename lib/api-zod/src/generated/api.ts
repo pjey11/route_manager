@@ -96,6 +96,10 @@ export const ListVisitsResponse = zod.object({
         .describe(
           "Optional note left by the volunteer when marking the stop complete",
         ),
+      devoteesAttended: zod
+        .number()
+        .nullish()
+        .describe("Number of devotees attended at this stop"),
     }),
   ),
   date: zod.string(),
@@ -183,6 +187,10 @@ export const StartVisitResponse = zod.object({
       .describe(
         "Optional note left by the volunteer when marking the stop complete",
       ),
+    devoteesAttended: zod
+      .number()
+      .nullish()
+      .describe("Number of devotees attended at this stop"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -240,6 +248,10 @@ export const CompleteVisitResponse = zod.object({
       .describe(
         "Optional note left by the volunteer when marking the stop complete",
       ),
+    devoteesAttended: zod
+      .number()
+      .nullish()
+      .describe("Number of devotees attended at this stop"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -297,6 +309,10 @@ export const EndVisitResponse = zod.object({
       .describe(
         "Optional note left by the volunteer when marking the stop complete",
       ),
+    devoteesAttended: zod
+      .number()
+      .nullish()
+      .describe("Number of devotees attended at this stop"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -354,6 +370,10 @@ export const EndDayResponse = zod.object({
       .describe(
         "Optional note left by the volunteer when marking the stop complete",
       ),
+    devoteesAttended: zod
+      .number()
+      .nullish()
+      .describe("Number of devotees attended at this stop"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -372,6 +392,10 @@ export const VolunteerCompleteBody = zod.object({
     .describe("ISO-8601 timestamp of when the stop was completed"),
   notes: zod.string().optional(),
   timeEdited: zod.boolean().optional(),
+  devoteesAttended: zod
+    .number()
+    .optional()
+    .describe("Number of devotees attended at this stop"),
 });
 
 export const VolunteerCompleteResponse = zod.object({
@@ -419,6 +443,10 @@ export const VolunteerCompleteResponse = zod.object({
       .describe(
         "Optional note left by the volunteer when marking the stop complete",
       ),
+    devoteesAttended: zod
+      .number()
+      .nullish()
+      .describe("Number of devotees attended at this stop"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -476,6 +504,10 @@ export const LastHomeResponse = zod.object({
       .describe(
         "Optional note left by the volunteer when marking the stop complete",
       ),
+    devoteesAttended: zod
+      .number()
+      .nullish()
+      .describe("Number of devotees attended at this stop"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -550,6 +582,10 @@ export const GeofenceAlertResponse = zod.object({
       .describe(
         "Optional note left by the volunteer when marking the stop complete",
       ),
+    devoteesAttended: zod
+      .number()
+      .nullish()
+      .describe("Number of devotees attended at this stop"),
   }),
 });
 
@@ -605,6 +641,10 @@ export const SendGeofenceMessageResponse = zod.object({
       .describe(
         "Optional note left by the volunteer when marking the stop complete",
       ),
+    devoteesAttended: zod
+      .number()
+      .nullish()
+      .describe("Number of devotees attended at this stop"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
