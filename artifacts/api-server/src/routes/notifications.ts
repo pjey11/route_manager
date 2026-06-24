@@ -41,7 +41,7 @@ router.post("/notifications/bulk", requireAdmin, async (req, res): Promise<void>
   const stopLines = visits.map((v) => {
     const lines = [
       `Time: ${formatTime12h(v.visitTime)}`,
-      v.streetAddress,
+      `*${v.streetAddress}*`,
       `${v.city} ${v.postalCode}`,
     ];
     if (v.prasadOffering) lines.push(`Prasad: ${v.prasadOffering}`);
