@@ -86,7 +86,7 @@ function buildRoster(visits: VisitFields[]): string {
     ];
     if (v.prasadOffering) lines.push(`Prasad: ${v.prasadOffering}`);
     return lines.join("\n");
-  }).join("\n-------------------------------\n");
+  }).join("\n\n");
 }
 
 function applyTemplate(content: string, visit: VisitFields, nextVisit?: VisitFields): string {

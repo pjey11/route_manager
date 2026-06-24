@@ -38,7 +38,7 @@ router.post("/notifications/bulk", requireAdmin, async (req, res): Promise<void>
     ];
     if (v.prasadOffering) lines.push(`Prasad: ${v.prasadOffering}`);
     return lines.join("\n");
-  }).join("\n-------------------------------\n");
+  }).join("\n\n");
 
   const message =
     `OmSaiRam! Palki begins for the day, ${monthDay}! Baba will be visiting the following homes:\n\n` +
