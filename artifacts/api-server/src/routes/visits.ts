@@ -104,9 +104,7 @@ function buildInTransitMessage(
     lines.push(next.streetAddress);
     lines.push(`${next.city} ${next.postalCode}`);
     lines.push(`Prasad: ${next.prasadOffering}`);
-    const directionsUrl = next.mapUrl ||
-      `https://maps.google.com/?q=${encodeURIComponent(`${next.streetAddress}, ${next.city}, ${next.postalCode}`)}`;
-    lines.push(`Directions: ${directionsUrl}`);
+    if (next.mapUrl) lines.push(`Directions: ${next.mapUrl}`);
   }
   return lines.join("\n");
 }
@@ -292,7 +290,8 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
         const city = String(row["city"]);
         const postalCode = String(row["postal code"]);
         const prasadOffering = String(row["prasad offering"] ?? "");
-        const mapUrl = row["map"] ? String(row["map"]) : null;
+        const rawMapUrl = row["map url"] ?? row["map_url"] ?? row["map"] ?? null;
+        const mapUrl = rawMapUrl ? String(rawMapUrl) : null;
 
         let timeStr = String(rawTime);
         if (!isNaN(Number(rawTime))) {
