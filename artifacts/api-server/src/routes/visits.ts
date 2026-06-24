@@ -93,14 +93,14 @@ function buildInTransitMessage(
   const lines: string[] = [
     "OmSaiRam! ",
     "",
-    "Palki arrived at:",
+    "*Palki arrived at:*",
     current.streetAddress,
     `${current.city} ${current.postalCode}`,
     `Prasad: ${current.prasadOffering}`,
   ];
   if (next) {
     lines.push("");
-    lines.push("Next Sai Home is");
+    lines.push("*Next Sai Home is:*");
     lines.push(next.streetAddress);
     lines.push(`${next.city} ${next.postalCode}`);
     lines.push(`Prasad: ${next.prasadOffering}`);
