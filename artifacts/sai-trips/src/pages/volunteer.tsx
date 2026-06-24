@@ -66,11 +66,9 @@ interface ConfirmModalProps {
 function ConfirmModal({ visit, onClose, onConfirm, isPending }: ConfirmModalProps) {
   const [time, setTime] = useState<string>(getLocalTime);
   const [originalTime] = useState<string>(getLocalTime);
-  const [affirmation, setAffirmation] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
   const [notes, setNotes] = useState("");
   const [devoteesAttended, setDevoteesAttended] = useState<string>("");
-
-  const confirmed = affirmation.trim().toLowerCase() === "yes";
   const address = formatAddress(visit);
 
   const handleConfirm = () => {
@@ -128,17 +126,32 @@ function ConfirmModal({ visit, onClose, onConfirm, isPending }: ConfirmModalProp
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs text-muted-foreground font-medium">
-              Type <span className="font-semibold text-foreground">Yes</span> to confirm
-            </label>
-            <Input
-              value={affirmation}
-              onChange={(e) => setAffirmation(e.target.value)}
-              placeholder="Type Yes..."
-              className="text-sm"
-              autoComplete="off"
-            />
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground font-medium">Confirm completion</label>
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <input
+                  type="radio"
+                  name="confirm"
+                  value="yes"
+                  checked={confirmed}
+                  onChange={() => setConfirmed(true)}
+                  className="accent-primary w-4 h-4"
+                />
+                Yes, the Palki visit is complete
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground">
+                <input
+                  type="radio"
+                  name="confirm"
+                  value="no"
+                  checked={!confirmed}
+                  onChange={() => setConfirmed(false)}
+                  className="accent-primary w-4 h-4"
+                />
+                No, not yet
+              </label>
+            </div>
           </div>
         </div>
 
