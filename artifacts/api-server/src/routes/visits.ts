@@ -77,18 +77,10 @@ function minutesToTime(minutes: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-function formatTime12h(t: string): string {
-  const [hh, mm] = t.split(":");
-  const h = parseInt(hh, 10);
-  const period = h >= 12 ? "PM" : "AM";
-  const h12 = h % 12 || 12;
-  return `${h12}:${mm} ${period}`;
-}
-
 function buildRoster(visits: VisitFields[]): string {
   return visits.map((v) => {
     const lines = [
-      `Time: ${formatTime12h(v.visitTime)}`,
+      `Time: ${v.visitTime}`,
       v.streetAddress,
       `${v.city} ${v.postalCode}`,
     ];
