@@ -28,7 +28,7 @@ router.post("/notifications/bulk", requireAdmin, async (req, res): Promise<void>
   }
 
   const dateObj = new Date(`${date}T12:00:00`);
-  const monthDay = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const monthDay = dateObj.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
 
   const formatTime = (t: string) => {
     const [hh, mm] = t.split(":");
@@ -49,7 +49,7 @@ router.post("/notifications/bulk", requireAdmin, async (req, res): Promise<void>
   }).join("\n\n");
 
   const message =
-    `OmSaiRam! Palki begins today, ${monthDay}! Baba will be visiting the following homes:\n\n` +
+    `OmSaiRam! Palki begins for the day, ${monthDay}! Baba will be visiting the following homes:\n\n` +
     stopLines;
 
   const result = await sendGroupMessage(message);
