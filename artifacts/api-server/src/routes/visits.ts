@@ -51,6 +51,7 @@ function buildVisitResponse(visit: typeof visitsTable.$inferSelect, isFirst: boo
     completedAt: visit.completedAt ? visit.completedAt.toISOString() : null,
     timeEdited: visit.completionTimeEdited ?? null,
     completionNotes: visit.completionNotes ?? null,
+    devoteesAttended: visit.devoteesAttended ?? null,
   };
 }
 
@@ -459,7 +460,7 @@ router.post("/visits/:id/volunteer-complete", requireAuth, async (req, res): Pro
     res.status(400).json({ error: "Invalid request body" });
     return;
   }
-  const { completedAt, notes, timeEdited } = parsedBody.data;
+  const { completedAt, notes, timeEdited, devoteesAttended } = parsedBody.data;
 
   const [visit] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
   if (!visit) {
@@ -477,6 +478,7 @@ router.post("/visits/:id/volunteer-complete", requireAuth, async (req, res): Pro
     completedAt: new Date(completedAt),
     completionNotes: notes ?? null,
     completionTimeEdited: timeEdited ?? false,
+    devoteesAttended: devoteesAttended ?? null,
   }).where(eq(visitsTable.id, id));
 
   const [updated] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));

@@ -11,4 +11,6 @@ export interface VolunteerCompleteBody {
   completedAt: string;
   notes?: string;
   timeEdited?: boolean;
+  /** Number of devotees attended at this stop */
+  devoteesAttended?: number;
 }

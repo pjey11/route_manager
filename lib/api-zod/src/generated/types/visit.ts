@@ -30,4 +30,6 @@ export interface Visit {
   timeEdited?: boolean | null;
   /** Optional note left by the volunteer when marking the stop complete */
   completionNotes?: string | null;
+  /** Number of devotees attended at this stop */
+  devoteesAttended?: number | null;
 }

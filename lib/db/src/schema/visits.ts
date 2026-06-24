@@ -30,6 +30,7 @@ export const visitsTable = pgTable("visits", {
   completedAt: timestamp("completed_at"),
   completionNotes: text("completion_notes"),
   completionTimeEdited: boolean("completion_time_edited"),
+  devoteesAttended: integer("devotees_attended"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
