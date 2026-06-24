@@ -104,7 +104,9 @@ function buildInTransitMessage(
     lines.push(next.streetAddress);
     lines.push(`${next.city} ${next.postalCode}`);
     lines.push(`Prasad: ${next.prasadOffering}`);
-    if (next.mapUrl) lines.push(`Directions: ${next.mapUrl}`);
+    const directionsUrl = next.mapUrl ||
+      `https://maps.google.com/?q=${encodeURIComponent(`${next.streetAddress}, ${next.city}, ${next.postalCode}`)}`;
+    lines.push(`Directions: ${directionsUrl}`);
   }
   return lines.join("\n");
 }
