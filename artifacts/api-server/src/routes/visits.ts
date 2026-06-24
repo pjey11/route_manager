@@ -86,6 +86,29 @@ function formatTime12h(t: string): string {
   return `${h12}:${mm} ${period}`;
 }
 
+function buildInTransitMessage(
+  current: { streetAddress: string; city: string; postalCode: string; prasadOffering: string },
+  next: { streetAddress: string; city: string; postalCode: string; prasadOffering: string; mapUrl?: string | null } | null
+): string {
+  const lines: string[] = [
+    "OmSaiRam! ",
+    "",
+    "Palki arrived at:",
+    current.streetAddress,
+    `${current.city} ${current.postalCode}`,
+    `Prasad: ${current.prasadOffering}`,
+  ];
+  if (next) {
+    lines.push("");
+    lines.push("Next Sai Home is");
+    lines.push(next.streetAddress);
+    lines.push(`${next.city} ${next.postalCode}`);
+    lines.push(`Prasad: ${next.prasadOffering}`);
+    if (next.mapUrl) lines.push(`Directions: ${next.mapUrl}`);
+  }
+  return lines.join("\n");
+}
+
 function buildRoster(visits: VisitFields[]): string {
   return visits.map((v) => {
     const lines = [
@@ -389,8 +412,7 @@ router.post("/visits/:id/complete", requireAdmin, async (req, res): Promise<void
     waMsg = await getTemplate(4);
   } else {
     const nextVisit = allVisits[idx + 1];
-    const tmpl3 = await getTemplate(3);
-    waMsg = applyTemplate(tmpl3, visit, nextVisit);
+    waMsg = buildInTransitMessage(visit, nextVisit);
   }
   const waResult = await sendGroupMessage(waMsg);
 
@@ -433,8 +455,7 @@ router.post("/visits/:id/end", requireAdmin, async (req, res): Promise<void> => 
     waMsg = await getTemplate(4);
   } else {
     const nextVisit = allVisits[idx + 1];
-    const tmpl3 = await getTemplate(3);
-    waMsg = applyTemplate(tmpl3, visit, nextVisit);
+    waMsg = buildInTransitMessage(visit, nextVisit);
   }
   const waResult = await sendGroupMessage(waMsg);
 
