@@ -49,7 +49,7 @@ router.post("/notifications/bulk", requireAdmin, async (req, res): Promise<void>
   }).join("\n\n");
 
   const message =
-    `OmSaiRam! Palki begins today, ${monthDay}. Baba will be visiting the following homes:\n\n` +
+    `OmSaiRam! Palki begins today, ${monthDay}! Baba will be visiting the following homes:\n\n` +
     stopLines;
 
   const result = await sendGroupMessage(message);
