@@ -465,7 +465,7 @@ export default function Home() {
                           className="w-full gap-2 text-sm"
                           size="sm"
                         >
-                          🏠 Last home for the day
+                          Palki arrived
                         </Button>
                       ) : (
                         <Button
