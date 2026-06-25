@@ -158,8 +158,10 @@ router.get("/visits", requireAuth, async (req, res): Promise<void> => {
 
   const isDayComplete = batch[0]?.isDayComplete ?? false;
 
+  const lastNonSkippedIdx = visits.reduce((last, v, i) => (!v.skipped ? i : last), -1);
+  const firstNonSkippedIdx = visits.findIndex(v => !v.skipped);
   const visitList = visits.map((v, i) =>
-    buildVisitResponse(v, i === 0, i === visits.length - 1)
+    buildVisitResponse(v, i === firstNonSkippedIdx, i === lastNonSkippedIdx)
   );
 
   let activeIndex: number | undefined;
