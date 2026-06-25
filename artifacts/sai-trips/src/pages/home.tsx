@@ -242,11 +242,19 @@ export default function Home() {
   const isActionPending = startMutation.isPending || completeMutation.isPending || endDayMutation.isPending || lastHomeMutation.isPending;
 
   const isUnlocked = (visit: Visit, index: number): boolean => {
-    if (visit.status !== "pending") return true;
-    if (index === 0) return true;
-    const prev = visitsData?.visits[index - 1];
-    if (!prev) return false;
-    return prev.status !== "pending" && prev.status !== "started";
+    if (visit.skipped || visit.status !== "pending") return true;
+    const allVisits = visitsData?.visits ?? [];
+    // Walk backwards past any skipped stops to find the last real predecessor
+    let i = index - 1;
+    while (i >= 0) {
+      const prev = allVisits[i];
+      if (!prev) break;
+      if (!prev.skipped) {
+        return prev.status !== "pending" && prev.status !== "started";
+      }
+      i--;
+    }
+    return true; // no non-skipped predecessor — treat as first stop
   };
 
   const isDone = (status: string) => ["in_transit", "completed", "ended", "day_ended"].includes(status);
