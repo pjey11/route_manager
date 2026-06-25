@@ -303,7 +303,7 @@ export default function Home() {
           data-testid="button-arrival-notice"
         >
           <Bell className="w-5 h-5" />
-          {startMutation.isPending ? "Sending..." : "Send Arrival Notice"}
+          {startMutation.isPending ? "Sending..." : "Palki day begins!"}
         </Button>
       )}
 
