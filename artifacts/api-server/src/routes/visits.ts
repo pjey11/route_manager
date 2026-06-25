@@ -52,6 +52,7 @@ function buildVisitResponse(visit: typeof visitsTable.$inferSelect, isFirst: boo
     timeEdited: visit.completionTimeEdited ?? null,
     completionNotes: visit.completionNotes ?? null,
     devoteesAttended: visit.devoteesAttended ?? null,
+    skipped: visit.skipped,
   };
 }
 
@@ -191,7 +192,7 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
     const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: null });
 
     // Normalize all row keys to lowercase so header casing in Excel doesn't matter
-    const allRows = rawRows.map((row) =>
+    const allRows: Record<string, unknown>[] = rawRows.map((row) =>
       Object.fromEntries(Object.entries(row).map(([k, v]) => [normalizeHeader(k), v]))
     );
 
@@ -223,7 +224,7 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
     const indexedRows = allRows
       .map((row, i) => ({ row, i }))
       .filter(({ row }) => Object.values(row).some((v) => v !== null && v !== ""));
-    const rows = indexedRows.map(({ row, i }) => ({
+    const rows: (Record<string, unknown> & { __rowIdx: number })[] = indexedRows.map(({ row, i }) => ({
       ...row,
       __rowIdx: i,
     }));
@@ -622,6 +623,36 @@ router.post("/visits/:id/end-day", requireAdmin, async (req, res): Promise<void>
     visit: buildVisitResponse(updated, idx === 0, idx === allVisits.length - 1),
     whatsappSent: waResult.success,
     whatsappError: waResult.error,
+  });
+});
+
+router.post("/visits/:id/skip", requireAdmin, async (req, res): Promise<void> => {
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid visit ID" });
+    return;
+  }
+
+  const [visit] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
+  if (!visit) {
+    res.status(404).json({ error: "Visit not found" });
+    return;
+  }
+
+  await db.update(visitsTable).set({ skipped: true }).where(eq(visitsTable.id, id));
+  const [updated] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
+
+  const allVisits = await db
+    .select()
+    .from(visitsTable)
+    .where(eq(visitsTable.date, visit.date))
+    .orderBy(asc(visitsTable.stopNumber));
+  const idx = allVisits.findIndex((v) => v.id === id);
+
+  res.json({
+    success: true,
+    message: "Visit skipped",
+    visit: buildVisitResponse(updated, idx === 0, idx === allVisits.length - 1),
   });
 });
 

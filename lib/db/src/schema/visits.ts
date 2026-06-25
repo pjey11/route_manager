@@ -31,6 +31,7 @@ export const visitsTable = pgTable("visits", {
   completionNotes: text("completion_notes"),
   completionTimeEdited: boolean("completion_time_edited"),
   devoteesAttended: integer("devotees_attended"),
+  skipped: boolean("skipped").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

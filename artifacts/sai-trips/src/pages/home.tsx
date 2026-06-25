@@ -9,6 +9,7 @@ import {
   useEndDay,
   useLastHome,
   useUpdateVisitTime,
+  useSkipVisit,
   type Visit,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,6 +30,8 @@ export default function Home() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingTime, setEditingTime] = useState("");
   const [confirmEdit, setConfirmEdit] = useState<{ id: number; newTime: string } | null>(null);
+  const [skipTarget, setSkipTarget] = useState<Visit | null>(null);
+  const [skipConfirmed, setSkipConfirmed] = useState(false);
 
   const { data: datesData } = useListVisitDates();
   const { data: visitsData, isLoading } = useListVisits(
@@ -42,6 +45,7 @@ export default function Home() {
   const endDayMutation = useEndDay();
   const lastHomeMutation = useLastHome();
   const updateTimeMutation = useUpdateVisitTime();
+  const skipMutation = useSkipVisit();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -120,6 +124,22 @@ export default function Home() {
           }
         },
         onError: () => toast.error("Failed to announce last home"),
+      }
+    );
+  };
+
+  const handleSkip = () => {
+    if (!skipTarget) return;
+    skipMutation.mutate(
+      { id: skipTarget.id },
+      {
+        onSuccess: () => {
+          invalidateList();
+          setSkipTarget(null);
+          setSkipConfirmed(false);
+          toast.success("Stop skipped.");
+        },
+        onError: () => toast.error("Failed to skip stop"),
       }
     );
   };
@@ -479,6 +499,17 @@ export default function Home() {
                           <ArrowRight className="w-4 h-4" />
                         </Button>
                       )}
+                      {!done && !visit.skipped && (
+                        <button
+                          onClick={() => { setSkipTarget(visit); setSkipConfirmed(false); }}
+                          className="mt-2 text-xs text-muted-foreground/60 hover:text-destructive underline underline-offset-2 transition-colors w-full text-center"
+                        >
+                          Skip this home
+                        </button>
+                      )}
+                      {visit.skipped && (
+                        <span className="mt-2 text-xs text-muted-foreground/50 italic w-full text-center block">Skipped</span>
+                      )}
                     </div>
 
                   </div>
@@ -506,6 +537,53 @@ export default function Home() {
             </Button>
             <Button onClick={handleConfirmTimeUpdate} disabled={updateTimeMutation.isPending}>
               {updateTimeMutation.isPending ? "Updating..." : "Yes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Skip confirmation dialog */}
+      <Dialog open={!!skipTarget} onOpenChange={open => { if (!open) { setSkipTarget(null); setSkipConfirmed(false); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold">Skip this stop?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Stop <span className="font-medium text-foreground">{skipTarget?.stopNumber}</span> — <span className="font-medium text-foreground">{skipTarget?.streetAddress}</span> will be hidden from the volunteer's view.
+          </p>
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground font-medium">Confirm skip</label>
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <input
+                  type="radio"
+                  name="skip-confirm"
+                  value="yes"
+                  checked={skipConfirmed}
+                  onChange={() => setSkipConfirmed(true)}
+                  className="accent-primary w-4 h-4"
+                />
+                Yes, skip this home
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground">
+                <input
+                  type="radio"
+                  name="skip-confirm"
+                  value="no"
+                  checked={!skipConfirmed}
+                  onChange={() => setSkipConfirmed(false)}
+                  className="accent-primary w-4 h-4"
+                />
+                No, keep it
+              </label>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => { setSkipTarget(null); setSkipConfirmed(false); }} disabled={skipMutation.isPending}>
+              Cancel
+            </Button>
+            <Button onClick={handleSkip} disabled={!skipConfirmed || skipMutation.isPending}>
+              {skipMutation.isPending ? "Skipping..." : "Skip Stop"}
             </Button>
           </DialogFooter>
         </DialogContent>

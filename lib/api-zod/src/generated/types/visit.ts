@@ -32,4 +32,6 @@ export interface Visit {
   completionNotes?: string | null;
   /** Number of devotees attended at this stop */
   devoteesAttended?: number | null;
+  /** Whether this stop was skipped by the admin */
+  skipped?: boolean;
 }

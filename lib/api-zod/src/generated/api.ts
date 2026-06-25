@@ -100,6 +100,10 @@ export const ListVisitsResponse = zod.object({
         .number()
         .nullish()
         .describe("Number of devotees attended at this stop"),
+      skipped: zod
+        .boolean()
+        .optional()
+        .describe("Whether this stop was skipped by the admin"),
     }),
   ),
   date: zod.string(),
@@ -191,6 +195,10 @@ export const StartVisitResponse = zod.object({
       .number()
       .nullish()
       .describe("Number of devotees attended at this stop"),
+    skipped: zod
+      .boolean()
+      .optional()
+      .describe("Whether this stop was skipped by the admin"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -252,6 +260,10 @@ export const CompleteVisitResponse = zod.object({
       .number()
       .nullish()
       .describe("Number of devotees attended at this stop"),
+    skipped: zod
+      .boolean()
+      .optional()
+      .describe("Whether this stop was skipped by the admin"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -313,6 +325,10 @@ export const EndVisitResponse = zod.object({
       .number()
       .nullish()
       .describe("Number of devotees attended at this stop"),
+    skipped: zod
+      .boolean()
+      .optional()
+      .describe("Whether this stop was skipped by the admin"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -374,6 +390,10 @@ export const EndDayResponse = zod.object({
       .number()
       .nullish()
       .describe("Number of devotees attended at this stop"),
+    skipped: zod
+      .boolean()
+      .optional()
+      .describe("Whether this stop was skipped by the admin"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -447,6 +467,10 @@ export const VolunteerCompleteResponse = zod.object({
       .number()
       .nullish()
       .describe("Number of devotees attended at this stop"),
+    skipped: zod
+      .boolean()
+      .optional()
+      .describe("Whether this stop was skipped by the admin"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -508,6 +532,10 @@ export const LastHomeResponse = zod.object({
       .number()
       .nullish()
       .describe("Number of devotees attended at this stop"),
+    skipped: zod
+      .boolean()
+      .optional()
+      .describe("Whether this stop was skipped by the admin"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),
@@ -528,6 +556,71 @@ export const UpdateVisitTimeResponse = zod.object({
   success: zod.boolean(),
   message: zod.string(),
   updatedCount: zod.number(),
+});
+
+/**
+ * @summary Admin skips a stop — hides it from the volunteer view
+ */
+export const SkipVisitParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const SkipVisitResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+  visit: zod.object({
+    id: zod.number(),
+    date: zod.string(),
+    stopNumber: zod.number(),
+    visitTime: zod.string(),
+    name: zod.string(),
+    phone: zod.string(),
+    streetAddress: zod.string(),
+    city: zod.string(),
+    postalCode: zod.string(),
+    prasadOffering: zod.string(),
+    status: zod.enum([
+      "pending",
+      "started",
+      "in_transit",
+      "completed",
+      "ended",
+      "day_ended",
+    ]),
+    isFirst: zod.boolean(),
+    isLast: zod.boolean(),
+    batchId: zod.number(),
+    mapUrl: zod
+      .string()
+      .nullish()
+      .describe("Tiny URL for the map to this stop"),
+    completedAt: zod
+      .string()
+      .nullish()
+      .describe(
+        "ISO-8601 timestamp of when the stop was confirmed complete by the volunteer",
+      ),
+    timeEdited: zod
+      .boolean()
+      .nullish()
+      .describe("Whether the volunteer manually edited the completion time"),
+    completionNotes: zod
+      .string()
+      .nullish()
+      .describe(
+        "Optional note left by the volunteer when marking the stop complete",
+      ),
+    devoteesAttended: zod
+      .number()
+      .nullish()
+      .describe("Number of devotees attended at this stop"),
+    skipped: zod
+      .boolean()
+      .optional()
+      .describe("Whether this stop was skipped by the admin"),
+  }),
+  whatsappSent: zod.boolean(),
+  whatsappError: zod.string().optional(),
 });
 
 /**
@@ -586,6 +679,10 @@ export const GeofenceAlertResponse = zod.object({
       .number()
       .nullish()
       .describe("Number of devotees attended at this stop"),
+    skipped: zod
+      .boolean()
+      .optional()
+      .describe("Whether this stop was skipped by the admin"),
   }),
 });
 
@@ -645,6 +742,10 @@ export const SendGeofenceMessageResponse = zod.object({
       .number()
       .nullish()
       .describe("Number of devotees attended at this stop"),
+    skipped: zod
+      .boolean()
+      .optional()
+      .describe("Whether this stop was skipped by the admin"),
   }),
   whatsappSent: zod.boolean(),
   whatsappError: zod.string().optional(),

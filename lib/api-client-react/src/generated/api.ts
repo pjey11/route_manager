@@ -1215,6 +1215,90 @@ export const useUpdateVisitTime = <
 };
 
 /**
+ * @summary Admin skips a stop — hides it from the volunteer view
+ */
+export const getSkipVisitUrl = (id: number) => {
+  return `/api/visits/${id}/skip`;
+};
+
+export const skipVisit = async (
+  id: number,
+  options?: RequestInit,
+): Promise<VisitActionResponse> => {
+  return customFetch<VisitActionResponse>(getSkipVisitUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getSkipVisitMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof skipVisit>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof skipVisit>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["skipVisit"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof skipVisit>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return skipVisit(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SkipVisitMutationResult = NonNullable<
+  Awaited<ReturnType<typeof skipVisit>>
+>;
+
+export type SkipVisitMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Admin skips a stop — hides it from the volunteer view
+ */
+export const useSkipVisit = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof skipVisit>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof skipVisit>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getSkipVisitMutationOptions(options));
+};
+
+/**
  * @summary Log that user is within 500m - returns template 2 message for manual send
  */
 export const getGeofenceAlertUrl = (id: number) => {

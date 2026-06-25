@@ -343,6 +343,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /visits/{id}/skip:
+    post:
+      operationId: skipVisit
+      tags: [visits]
+      summary: Admin skips a stop — hides it from the volunteer view
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Visit skipped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisitActionResponse"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /visits/{id}/geofence-alert:
     post:
       operationId: geofenceAlert
@@ -755,6 +780,9 @@ components:
           type: integer
           nullable: true
           description: Number of devotees attended at this stop
+        skipped:
+          type: boolean
+          description: Whether this stop was skipped by the admin
       required:
         - id
         - date

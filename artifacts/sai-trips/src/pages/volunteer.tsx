@@ -208,8 +208,8 @@ export default function Volunteer() {
 
   const visits = visitsData?.visits ?? [];
   const activeIndex = visitsData?.activeIndex;
-  const activeVisits = visits.filter(v => v.status === "pending" || v.status === "started" || v.status === "in_transit");
-  const doneVisits = visits.filter(v => !["pending", "started", "in_transit"].includes(v.status));
+  const activeVisits = visits.filter(v => !v.skipped && (v.status === "pending" || v.status === "started" || v.status === "in_transit"));
+  const doneVisits = visits.filter(v => !v.skipped && !["pending", "started", "in_transit"].includes(v.status));
 
   const getStatusBadge = (status: string) => {
     switch (status) {
