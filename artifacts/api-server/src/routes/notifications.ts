@@ -31,7 +31,8 @@ router.post("/notifications/bulk", requireAdmin, async (req, res): Promise<void>
   const monthDay = dateObj.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
 
   const formatTime12h = (t: string) => {
-    const [hh, mm] = t.split(":");
+    const clean = t.replace(/\s*(am|pm)$/i, "").trim();
+    const [hh, mm] = clean.split(":");
     const h = parseInt(hh, 10);
     const period = h >= 12 ? "PM" : "AM";
     const h12 = h % 12 || 12;
