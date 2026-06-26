@@ -1,4 +1,5 @@
 import { useListVisitDates, useListVisits, getListVisitsQueryKey } from "@workspace/api-client-react";
+import { formatTime12h } from "@/lib/utils";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -152,11 +153,11 @@ export default function Reports() {
                     {visit.stopNumber}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{visit.stopNumber}. {visit.visitTime}</p>
+                    <p className="font-medium text-sm truncate">{visit.stopNumber}. {formatTime12h(visit.visitTime)}</p>
                     <p className="text-xs text-muted-foreground truncate">{visit.streetAddress}, {visit.city}</p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
-                    <span className="text-xs text-muted-foreground hidden sm:block">{visit.visitTime}</span>
+                    <span className="text-xs text-muted-foreground hidden sm:block">{formatTime12h(visit.visitTime)}</span>
                     <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusColor(visit.status)}`}>
                       {statusLabel(visit.status)}
                     </span>

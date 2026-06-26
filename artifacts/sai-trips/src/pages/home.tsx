@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatTime12h } from "@/lib/utils";
 import { 
   useListVisits, 
   getListVisitsQueryKey,
@@ -415,7 +416,7 @@ export default function Home() {
                         ) : (
                           <span className="flex items-center gap-1.5 font-medium text-base">
                             <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                            {visit.visitTime}
+                            {formatTime12h(visit.visitTime)}
                             {!done && (
                               <button
                                 onClick={() => { setEditingId(visit.id); setEditingTime(visit.visitTime); }}
