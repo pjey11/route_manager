@@ -23,7 +23,7 @@ import { geocodeAddress } from "../lib/geocode";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-const REQUIRED_COLUMNS = ["date", "stop number", "anticipated visit time", "street address", "city", "postal code", "prasad offering"];
+const REQUIRED_COLUMNS = ["date", "stop number", "time", "street address", "city", "postal code", "prasad offering"];
 
 function normalizeHeader(h: string): string {
   return h.toLowerCase().trim();
@@ -257,7 +257,7 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
     const rowsWithNulls = rows.map((row, i) => {
       const dateVal = row["date"] ?? null;
       const stopVal = row["stop number"] ?? null;
-      const timeVal = row["anticipated visit time"] ?? null;
+      const timeVal = row["time"] ?? null;
       const streetVal = row["street address"] ?? null;
       const cityVal = row["city"] ?? null;
       const postalVal = row["postal code"] ?? null;
@@ -316,7 +316,7 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
 
       const visitInserts = dateRows.map((row) => {
         const rawStop = row["stop number"];
-        const rawTime = row["anticipated visit time"];
+        const rawTime = row["time"];
         const phone = row["phone number"] ? String(row["phone number"]) : "";
         const streetAddress = String(row["street address"]);
         const city = String(row["city"]);
