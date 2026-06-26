@@ -93,7 +93,7 @@ function formatTime12h(t: string): string {
 }
 
 function buildInTransitMessage(
-  current: { streetAddress: string; city: string; postalCode: string; prasadOffering: string },
+  current: { streetAddress: string; city: string; postalCode: string; prasadOffering: string; mapUrl?: string | null },
   next: { streetAddress: string; city: string; postalCode: string; prasadOffering: string; mapUrl?: string | null } | null
 ): string {
   const lines: string[] = [
@@ -104,6 +104,7 @@ function buildInTransitMessage(
     `${current.city} ${current.postalCode}`,
     `Prasad: ${current.prasadOffering}`,
   ];
+  if (current.mapUrl) lines.push(`Map: ${current.mapUrl}`);
   if (next) {
     lines.push("");
     lines.push("*Next Sai Home is:*");
