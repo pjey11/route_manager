@@ -207,7 +207,8 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
       let mapUrlColIdx = -1;
       for (let c = range.s.c; c <= range.e.c; c++) {
         const hCell = sheet[XLSX.utils.encode_cell({ r: range.s.r, c })];
-        if (hCell && normalizeHeader(String(hCell.v ?? "")) === "map url") {
+        const hNorm = normalizeHeader(String(hCell?.v ?? ""));
+        if (["map url", "map_url", "map", "location"].includes(hNorm)) {
           mapUrlColIdx = c;
           break;
         }
@@ -322,7 +323,7 @@ router.post("/visits/upload", requireAdmin, upload.single("file"), async (req, r
         const city = String(row["city"]);
         const postalCode = String(row["postal code"]);
         const prasadOffering = String(row["prasad offering"] ?? "");
-        const rawMapUrl = row["map url"] ?? row["map_url"] ?? row["map"] ?? null;
+        const rawMapUrl = row["map url"] ?? row["map_url"] ?? row["map"] ?? row["location"] ?? null;
         const rowIdx = row["__rowIdx"] as number;
         const mapUrl = (rawMapUrl ? String(rawMapUrl) : null) || hyperlinkMapUrls.get(rowIdx) || null;
 
