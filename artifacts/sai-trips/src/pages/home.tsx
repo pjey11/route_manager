@@ -498,15 +498,22 @@ export default function Home() {
                           <span className="text-xs text-center">Complete previous stops to unlock</span>
                         </div>
                       ) : isLast ? (
-                        <Button
-                          data-testid={`button-last-home-${visit.id}`}
-                          onClick={() => handleLastHome(visit)}
-                          disabled={isActionPending}
-                          className="w-full gap-2 text-sm"
-                          size="sm"
-                        >
-                          Palki arrived
-                        </Button>
+                        visit.status === "started" ? (
+                          <div className="flex flex-col items-center justify-center text-primary py-2 gap-1">
+                            <Check className="w-5 h-5" />
+                            <span className="text-xs text-center font-medium">Last home notified</span>
+                          </div>
+                        ) : (
+                          <Button
+                            data-testid={`button-last-home-${visit.id}`}
+                            onClick={() => handleLastHome(visit)}
+                            disabled={isActionPending}
+                            className="w-full gap-2 text-sm"
+                            size="sm"
+                          >
+                            Palki arrived
+                          </Button>
+                        )
                       ) : (
                         <Button
                           data-testid={`button-next-home-${visit.id}`}
