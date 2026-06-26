@@ -61,7 +61,7 @@ async function getTemplate(id: number): Promise<string> {
   return tmpl?.content || "";
 }
 
-type VisitFields = { streetAddress: string; city: string; postalCode: string; prasadOffering: string; visitTime: string };
+type VisitFields = { streetAddress: string; city: string; postalCode: string; prasadOffering: string; visitTime: string; mapUrl?: string | null };
 
 function formatAddress(v: VisitFields): string {
   return `${v.streetAddress}, ${v.city} ${v.postalCode}`;
@@ -124,6 +124,7 @@ function buildRoster(visits: VisitFields[]): string {
       `${v.city} ${v.postalCode}`,
     ];
     if (v.prasadOffering) lines.push(`Prasad: ${v.prasadOffering}`);
+    if (v.mapUrl) lines.push(`Map: ${v.mapUrl}`);
     return lines.join("\n");
   }).join("\n\n");
 }
