@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Clock, CheckCircle2, LogOut, ExternalLink } from "lucide-react";
+import { MapPin, Clock, CheckCircle2, LogOut, ExternalLink, Lock } from "lucide-react";
 import { VisitPhotos } from "@/components/visit-photos";
 import { useLocation } from "wouter";
 
@@ -331,13 +331,20 @@ export default function Volunteer() {
                       </span>
                     )}
 
-                    <Button
-                      className="w-full"
-                      onClick={() => setSelectedVisit(visit)}
-                      disabled={volunteerComplete.isPending}
-                    >
-                      Complete Trip
-                    </Button>
+                    {isCurrent ? (
+                      <Button
+                        className="w-full"
+                        onClick={() => setSelectedVisit(visit)}
+                        disabled={volunteerComplete.isPending}
+                      >
+                        Complete Trip
+                      </Button>
+                    ) : (
+                      <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground py-1">
+                        <Lock className="w-3.5 h-3.5 opacity-40" />
+                        Complete previous stop first
+                      </div>
+                    )}
                   </CardContent>
                   <VisitPhotos visitId={visit.id} />
                 </Card>
