@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatTime12h } from "@/lib/utils";
 import {
   useListVisits,
   useListVisitDates,
@@ -301,7 +302,7 @@ export default function Volunteer() {
                         </span>
                         <div className="flex items-center gap-1.5 text-sm font-medium">
                           <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                          {visit.visitTime}
+                          {formatTime12h(visit.visitTime)}
                         </div>
                       </div>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(visit.status)}`}>
@@ -371,7 +372,7 @@ export default function Volunteer() {
                   <p className="text-sm font-medium text-green-900 truncate">
                     Stop {visit.stopNumber} — {visit.streetAddress}
                   </p>
-                  <p className="text-xs text-green-700">{visit.visitTime}</p>
+                  <p className="text-xs text-green-700">{formatTime12h(visit.visitTime)}</p>
                 </div>
               </div>
             ))}
