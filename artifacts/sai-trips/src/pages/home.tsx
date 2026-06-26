@@ -274,10 +274,11 @@ export default function Home() {
   const isDone = (status: string) => ["in_transit", "completed", "ended", "day_ended"].includes(status);
 
   const visits = visitsData?.visits ?? [];
+  const activeVisits = visits.filter(v => !v.skipped);
   const dayStarted = visits.some(v => v.status !== "pending");
-  const firstVisit = visits[0];
-  const lastVisit = visits[visits.length - 1];
-  const lastIndex = visits.length - 1;
+  const firstVisit = activeVisits[0];
+  const lastVisit = activeVisits[activeVisits.length - 1];
+  const lastIndex = visits.indexOf(lastVisit);
   const showArrivalNotice = !isLoading && visits.length > 0 && !dayStarted && !visitsData?.isDayComplete;
   const showThankYou = !isLoading && lastVisit && !isDone(lastVisit.status) && isUnlocked(lastVisit, lastIndex) && !visitsData?.isDayComplete;
 
@@ -363,6 +364,7 @@ export default function Home() {
           </Card>
         ) : (
           visits.map((visit, index) => {
+            if (visit.skipped) return null;
             const unlocked = isUnlocked(visit, index);
             const done = isDone(visit.status);
             const isLast = visit.isLast;
