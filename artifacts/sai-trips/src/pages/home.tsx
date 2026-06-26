@@ -39,6 +39,9 @@ export default function Home() {
   const [confirmEdit, setConfirmEdit] = useState<{ id: number; newTime: string } | null>(null);
   const [skipTarget, setSkipTarget] = useState<Visit | null>(null);
   const [skipConfirmed, setSkipConfirmed] = useState(false);
+  const [nextHomeTarget, setNextHomeTarget] = useState<Visit | null>(null);
+  const [nextHomeConfirmed, setNextHomeConfirmed] = useState(false);
+  const [thankYouSent, setThankYouSent] = useState(false);
 
   const { data: datesData } = useListVisitDates();
   const { data: visitsData, isLoading } = useListVisits(
@@ -101,12 +104,15 @@ export default function Home() {
     );
   };
 
-  const handleNextHome = (visit: Visit) => {
+  const handleConfirmNextHome = () => {
+    if (!nextHomeTarget) return;
     completeMutation.mutate(
-      { id: visit.id },
+      { id: nextHomeTarget.id },
       {
         onSuccess: (res) => {
           invalidateList();
+          setNextHomeTarget(null);
+          setNextHomeConfirmed(false);
           if (res.whatsappSent) {
             toast.success("Group notified of next home. OmSaiRam!");
           } else {
@@ -176,6 +182,7 @@ export default function Home() {
       {
         onSuccess: (res) => {
           invalidateList();
+          setThankYouSent(true);
           if (res.whatsappSent) {
             toast.success("Day complete message sent to the group. Jai Sairam!");
           } else {
@@ -517,7 +524,7 @@ export default function Home() {
                       ) : (
                         <Button
                           data-testid={`button-next-home-${visit.id}`}
-                          onClick={() => handleNextHome(visit)}
+                          onClick={() => { setNextHomeTarget(visit); setNextHomeConfirmed(false); }}
                           disabled={isActionPending}
                           className="w-full gap-2 text-sm"
                           size="sm"
@@ -564,6 +571,53 @@ export default function Home() {
             </Button>
             <Button onClick={handleConfirmTimeUpdate} disabled={updateTimeMutation.isPending}>
               {updateTimeMutation.isPending ? "Updating..." : "Yes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Next home confirmation dialog */}
+      <Dialog open={!!nextHomeTarget} onOpenChange={open => { if (!open) { setNextHomeTarget(null); setNextHomeConfirmed(false); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold">Move to next stop?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Stop <span className="font-medium text-foreground">{nextHomeTarget?.stopNumber}</span> — <span className="font-medium text-foreground">{nextHomeTarget?.streetAddress}</span> will be marked complete and the group will be notified of the next home.
+          </p>
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground font-medium">Confirm</label>
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <input
+                  type="radio"
+                  name="next-home-confirm"
+                  value="yes"
+                  checked={nextHomeConfirmed}
+                  onChange={() => setNextHomeConfirmed(true)}
+                  className="accent-primary w-4 h-4"
+                />
+                Yes, Palki has arrived — notify next home
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground">
+                <input
+                  type="radio"
+                  name="next-home-confirm"
+                  value="no"
+                  checked={!nextHomeConfirmed}
+                  onChange={() => setNextHomeConfirmed(false)}
+                  className="accent-primary w-4 h-4"
+                />
+                No, not yet
+              </label>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => { setNextHomeTarget(null); setNextHomeConfirmed(false); }} disabled={completeMutation.isPending}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmNextHome} disabled={!nextHomeConfirmed || completeMutation.isPending}>
+              {completeMutation.isPending ? "Notifying..." : "Confirm"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -622,11 +676,11 @@ export default function Home() {
           variant="outline"
           className="w-full gap-2 text-base font-semibold border-primary/30 text-primary hover:bg-primary/5 shadow-sm"
           onClick={() => handleThankYou(lastVisit)}
-          disabled={isActionPending}
+          disabled={isActionPending || thankYouSent}
           data-testid="button-thank-you"
         >
           <Heart className="w-5 h-5" />
-          {endDayMutation.isPending ? "Sending..." : "Thank you"}
+          {endDayMutation.isPending ? "Sending..." : thankYouSent ? "Sent" : "Thank you"}
         </Button>
       )}
     </div>
