@@ -337,7 +337,7 @@ export default function Volunteer() {
                         onClick={() => setSelectedVisit(visit)}
                         disabled={volunteerComplete.isPending}
                       >
-                        Complete Trip
+                        Stop Completed
                       </Button>
                     ) : (
                       <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground py-1">
