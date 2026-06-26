@@ -128,6 +128,8 @@ function applyTemplate(content: string, visit: VisitFields, nextVisit?: VisitFie
   return content
     .replace(/\{address\}/g, formatAddress(visit))
     .replace(/\{address_next\}/g, nextAddress)
+    .replace(/\{street\}/g, visit.streetAddress)
+    .replace(/\{city_postal\}/g, `${visit.city} ${visit.postalCode}`)
     .replace(/\{prasad\}/g, visit.prasadOffering);
 }
 

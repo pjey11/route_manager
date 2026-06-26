@@ -500,7 +500,6 @@ export default function Home() {
                       ) : isLast ? (
                         <Button
                           data-testid={`button-last-home-${visit.id}`}
-                          variant="secondary"
                           onClick={() => handleLastHome(visit)}
                           disabled={isActionPending}
                           className="w-full gap-2 text-sm"
