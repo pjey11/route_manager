@@ -578,6 +578,9 @@ router.post("/visits/:id/last-home", requireAdmin, async (req, res): Promise<voi
     .orderBy(asc(visitsTable.stopNumber));
   const idx = allVisits.findIndex((v) => v.id === id);
 
+  await db.update(visitsTable).set({ status: "started" }).where(eq(visitsTable.id, id));
+  const [updatedVisit] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
+
   const templateContent = await getTemplate(5);
   const message = applyTemplate(templateContent, visit);
   const waResult = await sendGroupMessage(message);
@@ -585,7 +588,7 @@ router.post("/visits/:id/last-home", requireAdmin, async (req, res): Promise<voi
   res.json({
     success: true,
     message: "Last home announced",
-    visit: buildVisitResponse(visit, idx === 0, idx === allVisits.length - 1),
+    visit: buildVisitResponse(updatedVisit, idx === 0, idx === allVisits.length - 1),
     whatsappSent: waResult.success,
     whatsappError: waResult.error,
   });
