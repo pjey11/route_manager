@@ -105,7 +105,7 @@ function buildInTransitMessage(
     lines.push(next.streetAddress);
     lines.push(`${next.city} ${next.postalCode}`);
     lines.push(`Prasad: ${next.prasadOffering}`);
-    if (next.mapUrl) lines.push(`Directions: ${next.mapUrl}`);
+    if (next.mapUrl) lines.push(`Map: ${next.mapUrl}`);
   }
   return lines.join("\n");
 }
