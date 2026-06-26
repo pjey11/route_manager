@@ -533,7 +533,7 @@ export default function Home() {
                           <ArrowRight className="w-4 h-4" />
                         </Button>
                       )}
-                      {!visit.skipped && (
+                      {!visit.skipped && !done && (
                         <button
                           onClick={() => { setSkipTarget(visit); setSkipConfirmed(false); }}
                           className="mt-2 text-xs text-muted-foreground/60 hover:text-destructive underline underline-offset-2 transition-colors w-full text-center"
