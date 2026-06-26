@@ -25,7 +25,14 @@ import { VisitPhotos } from "@/components/visit-photos";
 
 export default function Home() {
   const queryClient = useQueryClient();
-  const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    return localStorage.getItem("sai_admin_selected_date") ?? format(new Date(), "yyyy-MM-dd");
+  });
+
+  const handleDateChange = (date: string) => {
+    localStorage.setItem("sai_admin_selected_date", date);
+    setSelectedDate(date);
+  };
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingTime, setEditingTime] = useState("");
@@ -59,7 +66,7 @@ export default function Home() {
           toast.success(`Successfully uploaded ${res.count} visits for ${res.date}`);
           queryClient.invalidateQueries({ queryKey: getListVisitsQueryKey() });
           queryClient.invalidateQueries({ queryKey: ["listVisitDates"] });
-          if (res.date) setSelectedDate(res.date);
+          if (res.date) handleDateChange(res.date);
         },
         onError: (err) => {
           const msg = (err as { data?: { error?: string } })?.data?.error || "Failed to upload file";
@@ -277,7 +284,7 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Select value={selectedDate} onValueChange={setSelectedDate}>
+          <Select value={selectedDate} onValueChange={handleDateChange}>
             <SelectTrigger className="w-[180px] bg-card" data-testid="select-date">
               <SelectValue placeholder="Select date" />
             </SelectTrigger>

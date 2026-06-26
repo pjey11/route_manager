@@ -174,7 +174,14 @@ function ConfirmModal({ visit, onClose, onConfirm, isPending }: ConfirmModalProp
 
 export default function Volunteer() {
   const today = format(new Date(), "yyyy-MM-dd");
-  const [selectedDate, setSelectedDate] = useState<string>(today);
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    return localStorage.getItem("sai_seva_selected_date") ?? today;
+  });
+
+  const handleDateChange = (date: string) => {
+    localStorage.setItem("sai_seva_selected_date", date);
+    setSelectedDate(date);
+  };
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { data: me } = useGetMe();
@@ -248,7 +255,7 @@ export default function Volunteer() {
         </div>
 
         {/* Date selector */}
-        <Select value={selectedDate} onValueChange={setSelectedDate}>
+        <Select value={selectedDate} onValueChange={handleDateChange}>
           <SelectTrigger className="w-full bg-card">
             <SelectValue placeholder="Select date" />
           </SelectTrigger>
