@@ -42,3 +42,8 @@ externalPort = 4200
 [nix]
 channel = "stable-25_05"
 packages = ["mmh"]
+
+[userenv]
+
+[userenv.shared]
+VOLUNTEER_PASSWORD = "123"
