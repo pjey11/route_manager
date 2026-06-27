@@ -50,14 +50,13 @@ export default function Login() {
   });
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
-    if (values.rememberMe) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ email: values.email, password: values.password }));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-
     loginMutation.mutate({ data: { email: values.email, password: values.password } }, {
       onSuccess: (res) => {
+        if (values.rememberMe) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ email: values.email, password: values.password }));
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
         setLocation(res.role === "volunteer" ? "/volunteer" : "/");
       },
       onError: (err) => {
