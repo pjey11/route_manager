@@ -21,6 +21,7 @@ export default function Reports() {
   const pending = visits.filter(v => v.status === "pending").length;
   const active = visits.filter(v => v.status === "started").length;
   const isDayComplete = visitsData?.isDayComplete ?? false;
+  const totalAttended = visits.reduce((sum, v) => sum + (v.devoteesAttended ?? 0), 0);
 
   const statusColor = (status: string) => {
     switch (status) {
@@ -70,7 +71,7 @@ export default function Reports() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <Card>
           <CardContent className="pt-5 pb-4">
             <div className="flex items-center gap-3">
@@ -124,6 +125,20 @@ export default function Reports() {
                   {isDayComplete ? "Complete" : total > 0 ? `${Math.round((completed / total) * 100)}%` : "—"}
                 </p>
                 <p className="text-xs text-muted-foreground">Day Status</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <Users className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-blue-600">{totalAttended > 0 ? totalAttended : "—"}</p>
+                <p className="text-xs text-muted-foreground">People Attended</p>
               </div>
             </div>
           </CardContent>
