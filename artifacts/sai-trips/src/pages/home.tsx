@@ -559,6 +559,42 @@ export default function Home() {
         )}
       </div>
 
+      {/* Completed Activities summary */}
+      {visits.filter(v => v.status === "completed").length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Completed Activities</p>
+          {visits.filter(v => v.status === "completed").map((visit) => (
+            <div key={visit.id} className="p-3 rounded-lg bg-green-50 border border-green-100 space-y-2">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-green-900">
+                    Stop {visit.stopNumber} — {visit.streetAddress}
+                  </p>
+                  <p className="text-xs text-green-700">{visit.city} {visit.postalCode}</p>
+                </div>
+              </div>
+              <div className="ml-8 space-y-1">
+                <p className="text-xs text-green-700/80">
+                  Scheduled: {formatTime12h(visit.visitTime)}
+                  {visit.completedAt && (
+                    <> · Completed: {format(new Date(visit.completedAt), "h:mm a")}
+                      {visit.timeEdited && <span className="ml-1 text-amber-600 font-medium">(time edited)</span>}
+                    </>
+                  )}
+                </p>
+                {visit.devoteesAttended != null && (
+                  <p className="text-xs text-green-700/80">Devotees attended: <span className="font-medium">{visit.devoteesAttended}</span></p>
+                )}
+                {visit.completionNotes && (
+                  <p className="text-xs italic text-green-700/70">"{visit.completionNotes}"</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Thank you button — below all cards */}
       <Dialog open={!!confirmEdit} onOpenChange={open => { if (!open) setConfirmEdit(null); }}>
         <DialogContent className="max-w-sm">
