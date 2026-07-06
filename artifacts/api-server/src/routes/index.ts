@@ -8,7 +8,6 @@ import profileRouter from "./profile";
 import storageRouter from "./storage";
 import photosRouter from "./photos";
 import aiSettingsRouter from "./ai-settings";
-import maintenanceRouter from "./maintenance";
 
 const router: IRouter = Router();
 
@@ -21,6 +20,5 @@ router.use(profileRouter);
 router.use(storageRouter);
 router.use(photosRouter);
 router.use(aiSettingsRouter);
-router.use(maintenanceRouter);
 
 export default router;
