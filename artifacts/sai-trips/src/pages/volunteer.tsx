@@ -29,9 +29,10 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Clock, CheckCircle2, LogOut, ExternalLink, Lock } from "lucide-react";
+import { MapPin, Clock, CheckCircle2, LogOut, ExternalLink, Lock, ListChecks, BarChart2 } from "lucide-react";
 import { VisitPhotos } from "@/components/visit-photos";
 import { useLocation } from "wouter";
+import Reports from "@/pages/reports";
 
 function getLocalTime(): string {
   const now = new Date();
@@ -175,6 +176,7 @@ function ConfirmModal({ visit, onClose, onConfirm, isPending }: ConfirmModalProp
 
 export default function Volunteer() {
   const today = format(new Date(), "yyyy-MM-dd");
+  const [activeTab, setActiveTab] = useState<"schedule" | "reports">("schedule");
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     return localStorage.getItem("sai_seva_selected_date") ?? today;
   });
@@ -246,7 +248,9 @@ export default function Volunteer() {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-serif font-bold text-primary">Seva Schedule</h1>
+            <h1 className="text-xl font-serif font-bold text-primary">
+              {activeTab === "schedule" ? "Seva Schedule" : "Reports"}
+            </h1>
             <p className="text-xs text-muted-foreground mt-0.5">{me?.email}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5 text-muted-foreground flex-shrink-0">
@@ -255,146 +259,174 @@ export default function Volunteer() {
           </Button>
         </div>
 
-        {/* Date selector */}
-        <Select value={selectedDate} onValueChange={handleDateChange}>
-          <SelectTrigger className="w-full bg-card">
-            <SelectValue placeholder="Select date" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={today}>Today — {format(parseISO(today), "MMM d, yyyy")}</SelectItem>
-            {datesData?.dates
-              .filter(d => d !== today)
-              .map(date => (
-                <SelectItem key={date} value={date}>
-                  {format(parseISO(date), "MMM d, yyyy")}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
+        {/* Tabs */}
+        <div className="flex gap-1 p-1 rounded-lg bg-muted">
+          <button
+            onClick={() => setActiveTab("schedule")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === "schedule" ? "bg-card text-primary shadow-sm" : "text-muted-foreground"
+            }`}
+          >
+            <ListChecks className="w-4 h-4" />
+            Schedule
+          </button>
+          <button
+            onClick={() => setActiveTab("reports")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === "reports" ? "bg-card text-primary shadow-sm" : "text-muted-foreground"
+            }`}
+          >
+            <BarChart2 className="w-4 h-4" />
+            Reports
+          </button>
+        </div>
 
-        {/* Loading */}
-        {isLoading && (
-          <div className="py-12 text-center text-muted-foreground text-sm">Loading visits…</div>
-        )}
+        {activeTab === "reports" ? (
+          <Reports hideHeader />
+        ) : (
+          <>
+            {/* Date selector */}
+            <Select value={selectedDate} onValueChange={handleDateChange}>
+              <SelectTrigger className="w-full bg-card">
+                <SelectValue placeholder="Select date" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={today}>Today — {format(parseISO(today), "MMM d, yyyy")}</SelectItem>
+                {datesData?.dates
+                  .filter(d => d !== today)
+                  .map(date => (
+                    <SelectItem key={date} value={date}>
+                      {format(parseISO(date), "MMM d, yyyy")}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
 
-        {/* No visits */}
-        {!isLoading && visits.length === 0 && (
-          <Card className="border-dashed border-2">
-            <CardContent className="py-12 text-center text-muted-foreground flex flex-col items-center">
-              <MapPin className="w-10 h-10 mb-3 opacity-20" />
-              <p className="font-medium text-sm">No visits scheduled for this date.</p>
-            </CardContent>
-          </Card>
-        )}
+            {/* Loading */}
+            {isLoading && (
+              <div className="py-12 text-center text-muted-foreground text-sm">Loading visits…</div>
+            )}
 
-        {/* Active visits */}
-        {activeVisits.length > 0 && (
-          <div className="space-y-3">
-            {activeVisits.map((visit) => {
-              const isCurrent = activeIndex !== undefined && visits.indexOf(visit) === activeIndex;
-              return (
-                <Card key={visit.id} className={`${isCurrent ? "ring-2 ring-primary/40 shadow-md" : ""}`}>
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/20 text-primary font-bold text-xs flex-shrink-0">
-                          {visit.stopNumber}
-                        </span>
-                        <div className="flex items-center gap-1.5 text-sm font-medium">
-                          <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                          {formatTime12h(visit.visitTime)}
+            {/* No visits */}
+            {!isLoading && visits.length === 0 && (
+              <Card className="border-dashed border-2">
+                <CardContent className="py-12 text-center text-muted-foreground flex flex-col items-center">
+                  <MapPin className="w-10 h-10 mb-3 opacity-20" />
+                  <p className="font-medium text-sm">No visits scheduled for this date.</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Active visits */}
+            {activeVisits.length > 0 && (
+              <div className="space-y-3">
+                {activeVisits.map((visit) => {
+                  const isCurrent = activeIndex !== undefined && visits.indexOf(visit) === activeIndex;
+                  return (
+                    <Card key={visit.id} className={`${isCurrent ? "ring-2 ring-primary/40 shadow-md" : ""}`}>
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/20 text-primary font-bold text-xs flex-shrink-0">
+                              {visit.stopNumber}
+                            </span>
+                            <div className="flex items-center gap-1.5 text-sm font-medium">
+                              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                              {formatTime12h(visit.visitTime)}
+                            </div>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(visit.status)}`}>
+                            {isCurrent ? "Current" : getStatusLabel(visit.status)}
+                          </span>
                         </div>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(visit.status)}`}>
-                        {isCurrent ? "Current" : getStatusLabel(visit.status)}
-                      </span>
-                    </div>
 
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${visit.streetAddress}, ${visit.city}, ${visit.postalCode}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-start gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
-                    >
-                      <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:text-primary" />
-                      <span className="group-hover:underline">
-                        {visit.streetAddress}, {visit.city} {visit.postalCode}
-                      </span>
-                    </a>
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${visit.streetAddress}, ${visit.city}, ${visit.postalCode}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-start gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+                        >
+                          <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:text-primary" />
+                          <span className="group-hover:underline">
+                            {visit.streetAddress}, {visit.city} {visit.postalCode}
+                          </span>
+                        </a>
 
-                    {visit.mapUrl && (
-                      <a
-                        href={visit.mapUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-                      >
-                        <ExternalLink className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-xs font-medium">Map</span>
-                      </a>
-                    )}
-                    {visit.prasadOffering && (
-                      <span className="inline-block text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
-                        🪔 {visit.prasadOffering}
-                      </span>
-                    )}
+                        {visit.mapUrl && (
+                          <a
+                            href={visit.mapUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                          >
+                            <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-xs font-medium">Map</span>
+                          </a>
+                        )}
+                        {visit.prasadOffering && (
+                          <span className="inline-block text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
+                            🪔 {visit.prasadOffering}
+                          </span>
+                        )}
 
-                    {isCurrent ? (
-                      <Button
-                        className="w-full"
-                        onClick={() => setSelectedVisit(visit)}
-                        disabled={volunteerComplete.isPending}
-                      >
-                        Stop Completed
-                      </Button>
-                    ) : (
-                      <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground py-1">
-                        <Lock className="w-3.5 h-3.5 opacity-40" />
-                        Complete previous stop first
-                      </div>
-                    )}
-                  </CardContent>
-                  <VisitPhotos visitId={visit.id} />
-                </Card>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Completed visits */}
-        {doneVisits.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Completed Activities</p>
-            {doneVisits.map((visit) => (
-              <div key={visit.id} className="p-3 rounded-lg bg-green-50 border border-green-100 space-y-2">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-green-900">
-                      Stop {visit.stopNumber} — {visit.streetAddress}
-                    </p>
-                    <p className="text-xs text-green-700">{visit.city} {visit.postalCode}</p>
-                  </div>
-                </div>
-                <div className="ml-8 space-y-1">
-                  <p className="text-xs text-green-700/80">
-                    Scheduled: {formatTime12h(visit.visitTime)}
-                    {visit.completedAt && (
-                      <> · Completed: {format(new Date(visit.completedAt), "h:mm a")}
-                        {visit.timeEdited && <span className="ml-1 text-amber-600 font-medium">(time edited)</span>}
-                      </>
-                    )}
-                  </p>
-                  {visit.devoteesAttended != null && (
-                    <p className="text-xs text-green-700/80">Devotees attended: <span className="font-medium">{visit.devoteesAttended}</span></p>
-                  )}
-                  {visit.completionNotes && (
-                    <p className="text-xs italic text-green-700/70">"{visit.completionNotes}"</p>
-                  )}
-                </div>
+                        {isCurrent ? (
+                          <Button
+                            className="w-full"
+                            onClick={() => setSelectedVisit(visit)}
+                            disabled={volunteerComplete.isPending}
+                          >
+                            Stop Completed
+                          </Button>
+                        ) : (
+                          <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground py-1">
+                            <Lock className="w-3.5 h-3.5 opacity-40" />
+                            Complete previous stop first
+                          </div>
+                        )}
+                      </CardContent>
+                      <VisitPhotos visitId={visit.id} />
+                    </Card>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+            )}
+
+            {/* Completed visits */}
+            {doneVisits.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Completed Activities</p>
+                {doneVisits.map((visit) => (
+                  <div key={visit.id} className="p-3 rounded-lg bg-green-50 border border-green-100 space-y-2">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-green-900">
+                          Stop {visit.stopNumber} — {visit.streetAddress}
+                        </p>
+                        <p className="text-xs text-green-700">{visit.city} {visit.postalCode}</p>
+                      </div>
+                    </div>
+                    <div className="ml-8 space-y-1">
+                      <p className="text-xs text-green-700/80">
+                        Scheduled: {formatTime12h(visit.visitTime)}
+                        {visit.completedAt && (
+                          <> · Completed: {format(new Date(visit.completedAt), "h:mm a")}
+                            {visit.timeEdited && <span className="ml-1 text-amber-600 font-medium">(time edited)</span>}
+                          </>
+                        )}
+                      </p>
+                      {visit.devoteesAttended != null && (
+                        <p className="text-xs text-green-700/80">Devotees attended: <span className="font-medium">{visit.devoteesAttended}</span></p>
+                      )}
+                      {visit.completionNotes && (
+                        <p className="text-xs italic text-green-700/70">"{visit.completionNotes}"</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
       </div>

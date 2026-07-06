@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 const MAX_RANGE_DAYS = 30;
 
-export default function Reports() {
+export default function Reports({ hideHeader = false }: { hideHeader?: boolean }) {
   const today = format(new Date(), "yyyy-MM-dd");
   const [startDate, setStartDate] = useState<string>(format(subDays(new Date(), 6), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState<string>(today);
@@ -122,10 +122,12 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-serif font-bold text-primary mb-1">Reports</h1>
-          <p className="text-muted-foreground text-sm">Visit analytics and trends over a date range</p>
-        </div>
+        {!hideHeader && (
+          <div>
+            <h1 className="text-2xl font-serif font-bold text-primary mb-1">Reports</h1>
+            <p className="text-muted-foreground text-sm">Visit analytics and trends over a date range</p>
+          </div>
+        )}
 
         <div className="flex items-end gap-3">
           <div className="flex flex-col gap-1">
