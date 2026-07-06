@@ -1,0 +1,1 @@
+- [api-zod barrel export collisions](api-zod-export-collisions.md) — generated zod consts and generated types can share names, causing TS2308; barrel must exclude colliding type names explicitly.
