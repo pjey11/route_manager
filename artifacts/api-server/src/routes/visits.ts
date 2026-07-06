@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import multer from "multer";
 import * as XLSX from "xlsx";
-import { eq, and, asc } from "drizzle-orm";
+import { eq, and, asc, gte, lte } from "drizzle-orm";
 import { db, visitsTable, uploadBatchesTable, notificationTemplatesTable } from "@workspace/db";
 import {
   ListVisitsQueryParams,
@@ -14,6 +14,7 @@ import {
   VolunteerCompleteBody,
   UpdateVisitTimeParams,
   UpdateVisitTimeBody,
+  GetVisitsReportQueryParams,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/requireAuth";
 import { requireAdmin } from "../middlewares/requireAdmin";
@@ -146,6 +147,84 @@ router.get("/visits/dates", requireAuth, async (_req, res): Promise<void> => {
     .orderBy(asc(uploadBatchesTable.date));
 
   res.json({ dates: batches.map((b) => b.date) });
+});
+
+router.get("/visits/report", requireAuth, async (req, res): Promise<void> => {
+  const parsed = GetVisitsReportQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: "startDate and endDate are required (YYYY-MM-DD)" });
+    return;
+  }
+  const { startDate, endDate } = parsed.data;
+
+  if (startDate > endDate) {
+    res.status(400).json({ error: "startDate must be before or equal to endDate" });
+    return;
+  }
+
+  const dayCount = Math.round((new Date(`${endDate}T00:00:00`).getTime() - new Date(`${startDate}T00:00:00`).getTime()) / 86400000) + 1;
+  if (dayCount > 30) {
+    res.status(400).json({ error: "Date range cannot exceed 30 days" });
+    return;
+  }
+
+  const visits = await db
+    .select()
+    .from(visitsTable)
+    .where(and(gte(visitsTable.date, startDate), lte(visitsTable.date, endDate)))
+    .orderBy(asc(visitsTable.date));
+
+  const byDate = new Map<string, typeof visits>();
+  for (const v of visits) {
+    const list = byDate.get(v.date) ?? [];
+    list.push(v);
+    byDate.set(v.date, list);
+  }
+
+  function durationMinutes(list: typeof visits): number | null {
+    const durations = list
+      .filter((v) => v.startedAt && v.completedAt)
+      .map((v) => (v.completedAt!.getTime() - v.startedAt!.getTime()) / 60000)
+      .filter((m) => m >= 0);
+    if (durations.length === 0) return null;
+    return Math.round((durations.reduce((a, b) => a + b, 0) / durations.length) * 10) / 10;
+  }
+
+  function summarize(list: typeof visits) {
+    const completedVisits = list.filter((v) => ["completed", "ended", "day_ended"].includes(v.status)).length;
+    const remainingVisits = list.filter((v) => ["pending", "started", "in_transit"].includes(v.status)).length;
+    const peopleAttended = list.reduce((sum, v) => sum + (v.devoteesAttended ?? 0), 0);
+    return {
+      totalVisits: list.length,
+      completedVisits,
+      remainingVisits,
+      peopleAttended,
+      avgVisitDurationMinutes: durationMinutes(list),
+    };
+  }
+
+  const trend: {
+    date: string;
+    totalVisits: number;
+    completedVisits: number;
+    remainingVisits: number;
+    peopleAttended: number;
+    avgVisitDurationMinutes: number | null;
+  }[] = [];
+  for (const [date, list] of Array.from(byDate.entries()).sort(([a], [b]) => a.localeCompare(b))) {
+    trend.push({ date, ...summarize(list) });
+  }
+
+  const overall = summarize(visits);
+  const activeDayCount = byDate.size || 1;
+
+  res.json({
+    summary: {
+      ...overall,
+      avgVisitsPerDay: Math.round((overall.totalVisits / activeDayCount) * 10) / 10,
+    },
+    trend,
+  });
 });
 
 router.get("/visits", requireAuth, async (req, res): Promise<void> => {
@@ -401,7 +480,7 @@ router.post("/visits/:id/start", requireAdmin, async (req, res): Promise<void> =
     return;
   }
 
-  await db.update(visitsTable).set({ status: "started" }).where(eq(visitsTable.id, id));
+  await db.update(visitsTable).set({ status: "started", startedAt: new Date() }).where(eq(visitsTable.id, id));
   const [updated] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
 
   const allVisits = await db
@@ -584,7 +663,7 @@ router.post("/visits/:id/last-home", requireAdmin, async (req, res): Promise<voi
     .orderBy(asc(visitsTable.stopNumber));
   const idx = allVisits.findIndex((v) => v.id === id);
 
-  await db.update(visitsTable).set({ status: "started" }).where(eq(visitsTable.id, id));
+  await db.update(visitsTable).set({ status: "started", startedAt: new Date() }).where(eq(visitsTable.id, id));
   const [updatedVisit] = await db.select().from(visitsTable).where(eq(visitsTable.id, id));
 
   const templateContent = await getTemplate(5);
