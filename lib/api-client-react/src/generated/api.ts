@@ -26,10 +26,12 @@ import type {
   DatesResponse,
   ErrorResponse,
   GeofenceResponse,
+  GetVisitsReportParams,
   HealthStatus,
   ListVisitsParams,
   LoginBody,
   Profile,
+  ReportResponse,
   RequestUploadUrlBody,
   RequestUploadUrlResponse,
   SuccessResponse,
@@ -612,6 +614,100 @@ export function useListVisitDates<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListVisitDatesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get aggregated visit analytics for a date range (max 30 days)
+ */
+export const getGetVisitsReportUrl = (params: GetVisitsReportParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/visits/report?${stringifiedParams}`
+    : `/api/visits/report`;
+};
+
+export const getVisitsReport = async (
+  params: GetVisitsReportParams,
+  options?: RequestInit,
+): Promise<ReportResponse> => {
+  return customFetch<ReportResponse>(getGetVisitsReportUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetVisitsReportQueryKey = (params?: GetVisitsReportParams) => {
+  return [`/api/visits/report`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetVisitsReportQueryOptions = <
+  TData = Awaited<ReturnType<typeof getVisitsReport>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetVisitsReportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getVisitsReport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetVisitsReportQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getVisitsReport>>> = ({
+    signal,
+  }) => getVisitsReport(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getVisitsReport>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetVisitsReportQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getVisitsReport>>
+>;
+export type GetVisitsReportQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get aggregated visit analytics for a date range (max 30 days)
+ */
+
+export function useGetVisitsReport<
+  TData = Awaited<ReturnType<typeof getVisitsReport>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetVisitsReportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getVisitsReport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetVisitsReportQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

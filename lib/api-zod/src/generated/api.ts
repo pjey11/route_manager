@@ -140,6 +140,40 @@ export const ListVisitDatesResponse = zod.object({
 });
 
 /**
+ * @summary Get aggregated visit analytics for a date range (max 30 days)
+ */
+export const GetVisitsReportQueryParams = zod.object({
+  startDate: zod.coerce.string(),
+  endDate: zod.coerce.string(),
+});
+
+export const GetVisitsReportResponse = zod.object({
+  summary: zod.object({
+    totalVisits: zod.number(),
+    completedVisits: zod.number(),
+    remainingVisits: zod.number(),
+    peopleAttended: zod.number(),
+    avgVisitDurationMinutes: zod
+      .number()
+      .nullable()
+      .describe(
+        "Average minutes between a visit being started and completed. Null if no visits with both timestamps exist in range.",
+      ),
+    avgVisitsPerDay: zod.number(),
+  }),
+  trend: zod.array(
+    zod.object({
+      date: zod.string(),
+      totalVisits: zod.number(),
+      completedVisits: zod.number(),
+      remainingVisits: zod.number(),
+      peopleAttended: zod.number(),
+      avgVisitDurationMinutes: zod.number().nullable(),
+    }),
+  ),
+});
+
+/**
  * @summary Mark visit as started and send template 1 to contact
  */
 export const StartVisitParams = zod.object({

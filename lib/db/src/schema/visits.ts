@@ -27,6 +27,7 @@ export const visitsTable = pgTable("visits", {
   lng: real("lng"),
   status: text("status").notNull().default("pending"),
   mapUrl: text("map_url"),
+  startedAt: timestamp("started_at"),
   completedAt: timestamp("completed_at"),
   completionNotes: text("completion_notes"),
   completionTimeEdited: boolean("completion_time_edited"),

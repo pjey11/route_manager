@@ -107,6 +107,30 @@ export interface DatesResponse {
   dates: string[];
 }
 
+export interface ReportSummary {
+  totalVisits: number;
+  completedVisits: number;
+  remainingVisits: number;
+  peopleAttended: number;
+  /** Average minutes between a visit being started and completed. Null if no visits with both timestamps exist in range. */
+  avgVisitDurationMinutes: number | null;
+  avgVisitsPerDay: number;
+}
+
+export interface ReportTrendPoint {
+  date: string;
+  totalVisits: number;
+  completedVisits: number;
+  remainingVisits: number;
+  peopleAttended: number;
+  avgVisitDurationMinutes: number | null;
+}
+
+export interface ReportResponse {
+  summary: ReportSummary;
+  trend: ReportTrendPoint[];
+}
+
 export interface VisitActionResponse {
   success: boolean;
   message?: string;
@@ -230,4 +254,15 @@ export type ListVisitsParams = {
 
 export type UploadVisitsBody = {
   file: Blob;
+};
+
+export type GetVisitsReportParams = {
+  /**
+   * Start date in YYYY-MM-DD format (inclusive)
+   */
+  startDate: string;
+  /**
+   * End date in YYYY-MM-DD format (inclusive)
+   */
+  endDate: string;
 };
