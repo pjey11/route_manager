@@ -7,7 +7,7 @@ const router: IRouter = Router();
 
 // TEMPORARY one-time data fix route — remove after use.
 // Updates the "8 Aries St" visit on 2026-07-10 to "42 Brentcliff Dr" / L7A 2N1.
-router.post("/api/maintenance/fix-visit-158", requireAdmin, async (req, res) => {
+router.post("/maintenance/fix-visit-158", requireAdmin, async (req, res) => {
   const updated = await db
     .update(visitsTable)
     .set({ streetAddress: "42 Brentcliff Dr", postalCode: "L7A 2N1" })
